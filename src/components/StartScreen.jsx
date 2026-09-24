@@ -1,5 +1,6 @@
 import React from 'react';
 import HistoryChart from './HistoryChart';
+import CalculationHistory from './CalculationHistory';
 
 /**
  * 시작 화면 - 시험 유형 선택, 문제 수 설정, 과거 기록 차트
@@ -13,6 +14,7 @@ const StartScreen = ({
     setProblemCount,
     onStart,
     history,
+    onClearHistory,
 }) => {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 py-12 bg-gray-50">
@@ -31,7 +33,7 @@ const StartScreen = ({
                         <option value="TABLE">자료 읽기 (표 · 그래프)</option>
                         <option value="PATTERN">규칙 찾기 (GSAT)</option>
                         <option value="SEQUENCE">수열추리</option>
-                        <option value="ADDITION">네 수 더하기 (100~9999)</option>
+                        <option value="ADDITION">계산 훈련 (평균 · 합 · 증가율 · 비율)</option>
                     </select>
                 </div>
                 <div className="mb-4">
@@ -59,6 +61,13 @@ const StartScreen = ({
                 {history.length > 0 && (
                     <div className="mt-12 border-t border-black pt-8">
                         <h2 className="text-xl font-bold mb-4">[ 내 기록 변화 ]</h2>
+                        <button
+                            type="button"
+                            onClick={onClearHistory}
+                            className="border border-black px-4 py-2 mb-6 text-sm hover:bg-gray-100"
+                        >
+                            전체 기록 초기화
+                        </button>
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold mb-2">자료 읽기 기록 (표 · 그래프)</h3>
                             <HistoryChart history={history.filter((r) => ['TABLE', 'PLOT'].includes(r.examType))} />
@@ -73,9 +82,8 @@ const StartScreen = ({
                             <HistoryChart history={history.filter((r) => r.examType === 'SEQUENCE')} />
                         </div>
                         <div className="mb-6">
-                            <h3 className="text-lg font-semibold mb-2">네 수 더하기 기록</h3>
-                            <HistoryChart metric="averageErrorRate" history={history.filter((r) => r.examType === 'ADDITION')} />
-                            <p className="text-xs text-gray-500 mt-2">평균 오차율은 유효 응답 기준입니다. 이전 정답률 기록과 유효 응답이 없는 회차는 오차율이 표시되지 않습니다.</p>
+                            <h3 className="text-lg font-semibold mb-2">계산 훈련 기록</h3>
+                            <CalculationHistory history={history.filter((r) => r.examType === 'ADDITION')} />
                         </div>
                         <div className="text-xs text-gray-500 mt-2 mb-6 text-right">
                             * 최근 20회 기록 표시

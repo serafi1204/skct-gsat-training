@@ -6,8 +6,8 @@ import { Chart } from 'chart.js/auto';
  * @param {Object} props
  * @param {Array<{accuracy: number, averageTime: number}>} props.history
  */
-const HistoryChart = ({ history, metric = 'accuracy' }) => {
-    const metricLabel = metric === 'averageErrorRate' ? '평균 오차율 (%, 낮을수록 좋음)' : '정답률 (%)';
+const HistoryChart = ({ history, metric = 'accuracy', showTime = true }) => {
+    const metricLabel = metric === 'averageTime' ? '전체 문항 평균 시간 (초)' : metric === 'averageErrorRate' ? '평균 오차율 (%, 낮을수록 좋음)' : metric === 'comparisonAccuracy' ? '증가율 비교 정답률 (%)' : '정답률 (%)';
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -30,7 +30,7 @@ const HistoryChart = ({ history, metric = 'accuracy' }) => {
                         yAxisID: 'y',
                         tension: 0.1,
                     },
-                    {
+                    ...(showTime ? [{
                         label: '평균 시간 (초)',
                         data: displayHistory.map((h) => h.averageTime),
                         borderColor: '#888',
@@ -38,7 +38,7 @@ const HistoryChart = ({ history, metric = 'accuracy' }) => {
                         borderDash: [5, 5],
                         yAxisID: 'y1',
                         tension: 0.1,
-                    },
+                    }] : []),
                 ],
             },
             options: {
@@ -50,16 +50,16 @@ const HistoryChart = ({ history, metric = 'accuracy' }) => {
                         display: true,
                         position: 'left',
                         min: 0,
-                        ...(metric === 'accuracy' ? { max: 100 } : {}),
+                        ...(['accuracy', 'comparisonAccuracy'].includes(metric) ? { max: 100 } : {}),
                         title: { display: true, text: metricLabel },
                     },
-                    y1: {
+                    ...(showTime ? { y1: {
                         type: 'linear',
                         display: true,
                         position: 'right',
                         grid: { drawOnChartArea: false },
                         title: { display: true, text: '평균 시간 (초)' },
-                    },
+                    } } : {}),
                 },
             },
         });
@@ -67,7 +67,7 @@ const HistoryChart = ({ history, metric = 'accuracy' }) => {
         return () => {
             if (chartInstance.current) chartInstance.current.destroy();
         };
-    }, [history, metric, metricLabel]);
+    }, [history, metric, metricLabel, showTime]);
 
     return <canvas ref={chartRef}></canvas>;
 };

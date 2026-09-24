@@ -8,11 +8,23 @@ export function additionErrorRate(input, answer) {
 }
 
 export function summarizeAddition(results) {
-    const valid = results.filter(r => Number.isFinite(r.errorRate));
+    const calculations = results.filter(r => r.problem?.scoring !== 'choice');
+    const comparisons = results.filter(r => r.problem?.scoring === 'choice');
+    const valid = calculations.filter(r => Number.isFinite(r.errorRate));
+    const comparisonCorrect = comparisons.filter(r => r.correct).length;
     return {
         averageErrorRate: valid.length ? valid.reduce((sum, r) => sum + r.errorRate / valid.length, 0) : null,
         validCount: valid.length,
-        invalidCount: results.length - valid.length,
+        invalidCount: calculations.length - valid.length,
+        calculationCount: calculations.length,
+        comparisonCount: comparisons.length,
+        comparisonCorrect,
+        comparisonAccuracy: comparisons.length ? comparisonCorrect / comparisons.length * 100 : null,
+        byType: ['average', 'sum', 'share'].map(type => {
+            const items = calculations.filter(r => r.problem?.type === type);
+            const scored = items.filter(r => Number.isFinite(r.errorRate));
+            return { type, count: items.length, validCount: scored.length, averageErrorRate: scored.length ? scored.reduce((sum, r) => sum + r.errorRate / scored.length, 0) : null };
+        }),
         totalCount: results.length,
     };
 }

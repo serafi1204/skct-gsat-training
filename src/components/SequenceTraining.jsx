@@ -21,7 +21,7 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
         submitted.current = true;
         const nextResults = [...results, {
             problem, input,
-            ...(useErrorRate ? { errorRate: additionErrorRate(input, problem.answer) } : { correct: isSequenceAnswerCorrect(input, problem.answer) }),
+            ...(useErrorRate && problem.scoring !== 'choice' ? { errorRate: additionErrorRate(input, problem.answer) } : { correct: isSequenceAnswerCorrect(input, problem.answer) }),
             timeTaken: (Date.now() - startedAt.current) / 1000,
         }];
         setResults(nextResults);
@@ -54,23 +54,27 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         {useErrorRate ? <>
                             <p>평균 오차율<br /><strong>{formatError(summary.averageErrorRate)}</strong></p>
-                            <p>유효 응답<br /><strong>{summary.validCount} / {problems.length}</strong></p>
+                            <p>계산 유효 응답<br /><strong>{summary.validCount} / {summary.calculationCount}</strong></p>
                         </> : <>
                             <p>정답률<br /><strong>{Math.round(correctCount / problems.length * 100)}%</strong></p>
                             <p>맞힌 개수<br /><strong>{correctCount} / {problems.length}</strong></p>
                         </>}
                         <p>문제당 평균 시간<br /><strong>{(totalTime / problems.length).toFixed(1)}초</strong></p>
                     </div>
-                    {useErrorRate && <p className="text-sm mb-6">오차율 = |입력값 − 정답| ÷ 정답 × 100. 낮을수록 정확합니다.<br />미응답·잘못된 입력 {summary.invalidCount}개는 평균에서 제외합니다.</p>}
+                    {useErrorRate && <div className="text-sm mb-6 space-y-2">
+                        <p>오차율 = |입력값 − 정답| ÷ 정답 × 100. 낮을수록 정확합니다.<br />계산 문항의 미응답·잘못된 입력 {summary.invalidCount}개는 평균에서 제외합니다.</p>
+                        {summary.byType.filter(item => item.count > 0).map(item => <p key={item.type}>{({average: '평균', sum: '합', share: '비율'})[item.type]}: 평균 오차율 {formatError(item.averageErrorRate)} (유효 {item.validCount}/{item.count})</p>)}
+                        <p>증가율 비교: {summary.comparisonCount ? `${summary.comparisonCorrect}/${summary.comparisonCount} 정답 (${summary.comparisonAccuracy.toFixed(1)}%)` : '출제 없음'} · 계산 오차율과 별도 평가</p>
+                    </div>}
                     <button onClick={onRestart} className="bg-black text-white py-2 px-8">처음으로</button>
                 </section>
                 <h2 className="text-lg font-bold mb-4">정답 및 해설</h2>
                 <div className="space-y-4">
                     {results.map((result, i) => (
                         <section key={i} className="bg-white border border-black p-4">
-                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · {useErrorRate ? `오차율 ${formatError(result.errorRate)}` : result.correct ? '정답' : '오답'}</h3>
-                            <p className="font-mono mb-2 break-words">{promptFor(result.problem)}</p>
-                            <p className="text-sm mb-2">입력: {result.input.trim() || '(공백)'} / 정답: {result.problem.answer}</p>
+                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · {useErrorRate && result.problem.scoring !== 'choice' ? `오차율 ${formatError(result.errorRate)}` : result.correct ? '정답' : '오답'}</h3>
+                            <p className="font-mono mb-2 break-words whitespace-pre-line">{promptFor(result.problem)}</p>
+                            <p className="text-sm mb-2">입력: {result.input.trim() || '(공백)'} / 정답: {result.problem.displayAnswer ?? result.problem.answer}</p>
                             <p className="text-sm leading-relaxed">{result.problem.explanation}</p>
                         </section>
                     ))}
@@ -85,9 +89,10 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
                 <h1 className="text-xl font-bold">{title}</h1>
                 <p aria-live="polite">{index + 1} / {problems.length}문제</p>
             </header>
-            <p className="text-sm mb-6">{instruction}</p>
-            {useErrorRate && <p className="text-sm mb-4 text-gray-600">정답과의 오차율로 평가합니다. 0%에 가까울수록 정확합니다.</p>}
-            <div className="bg-white border border-black p-6 mb-8 text-xl font-mono leading-loose break-words" aria-label="문제">
+            {useErrorRate && <h2 className="font-bold mb-3">{problem.label}</h2>}
+            <p className="text-sm mb-6">{problem.instruction ?? instruction}</p>
+            {useErrorRate && problem.scoring !== 'choice' && <p className="text-sm mb-4 text-gray-600">정답과의 오차율로 평가합니다. 0%에 가까울수록 정확합니다.</p>}
+            <div className="bg-white border border-black p-6 mb-8 text-xl font-mono leading-loose break-words whitespace-pre-line" aria-label="문제">
                 {promptFor(problem)}
             </div>
             <form onSubmit={submit}>

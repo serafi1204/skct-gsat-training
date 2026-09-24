@@ -202,6 +202,12 @@ const App = () => {
                 setProblemCount={setProblemCount}
                 onStart={handleStart}
                 history={history}
+                onClearHistory={() => {
+                    if (window.confirm('모든 훈련 기록을 초기화할까요? 삭제한 기록은 복구할 수 없습니다.')) {
+                        localStorage.removeItem('skctHistory');
+                        setHistory([]);
+                    }
+                }}
             />
         );
     }
@@ -211,8 +217,7 @@ const App = () => {
             return (
                 <SequenceTraining
                     examType={examType}
-                    title={examType === 'ADDITION' ? '네 수 더하기' : undefined}
-                    instruction={examType === 'ADDITION' ? '100~9999 사이의 네 수를 모두 더한 값을 입력하세요. (콤마 제외)' : undefined}
+                    title={examType === 'ADDITION' ? '계산 훈련' : undefined}
                     problems={sequenceProblems}
                     onComplete={(record) => {
                         const existing = JSON.parse(localStorage.getItem('skctHistory') || '[]');
