@@ -1,17 +1,28 @@
-import { ROW_CATEGORIES, COL_CATEGORIES } from '../data/categories';
+import { ROW_CATEGORIES, COL_CATEGORIES } from '../data/categories.js';
 
 /**
  * 표 탐색 문제 생성
  * @param {boolean} isTwoTables - 2개 표 모드 여부
  * @returns {{ isTwoTables: boolean, tables: Array, questions: Array }}
  */
-export const generateTableProblem = (isTwoTables) => {
+export const generateTableProblem = (isTwoTables, { plot = false } = {}) => {
     const numTables = isTwoTables ? 2 : 1;
     const tables = [];
     const randomRowCategory = ROW_CATEGORIES[Math.floor(Math.random() * ROW_CATEGORIES.length)];
-    const randomColCategory = COL_CATEGORIES[Math.floor(Math.random() * COL_CATEGORIES.length)];
+    const randomColCategory = plot
+        ? { title: '월별 실적', items: ['1월', '2월', '3월', '4월', '5월'] }
+        : COL_CATEGORIES[Math.floor(Math.random() * COL_CATEGORIES.length)];
     const prefixes = isTwoTables ? ['국내총괄', '글로벌총괄'] : [''];
-    const isTransposed = Math.random() < 0.5;
+    const isTransposed = !plot && Math.random() < 0.5;
+    const shades = ['#303030', '#484848', '#606060', '#787878', '#909090', '#a8a8a8', '#c0c0c0'];
+    const shuffle = (items) => {
+        for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [items[i], items[j]] = [items[j], items[i]];
+        }
+        return items;
+    };
+    const colors = plot ? shuffle(shades.slice(0, randomRowCategory.items.length)) : undefined;
 
     for (let t = 0; t < numTables; t++) {
         const baseTitle = `${randomRowCategory.title} ${randomColCategory.title}`;
@@ -30,7 +41,14 @@ export const generateTableProblem = (isTwoTables) => {
             }
             data.push(rowData);
         }
-        tables.push({ template, data });
+        if (plot) {
+            // Separate labels vertically at each x position, while letting lines cross.
+            for (let c = 0; c < template.cols.length; c++) {
+                const ranks = shuffle(Array.from({ length: template.rows.length }, (_, i) => i));
+                ranks.forEach((rank, r) => { data[r][c] = 1100 + rank * 1200 + Math.floor(Math.random() * 301); });
+            }
+        }
+        tables.push({ template, data, ...(plot ? { colors } : {}) });
     }
 
     const randPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -143,5 +161,5 @@ export const generateTableProblem = (isTwoTables) => {
             questions.push(qObj);
         }
     }
-    return { isTwoTables, tables, questions };
+    return { isTwoTables, isPlot: plot, tables, questions };
 };

@@ -1,11 +1,14 @@
 import React from 'react';
 import DataTable from './DataTable';
+import LinePlot from './LinePlot';
 
 /**
  * 결과 화면 - 정답률, 맞힌 개수, 평균 시간 + 오답 노트
  */
 const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCount, onRestart }) => {
-    const totalSub = sessionResult?.totalCount || (examType === 'TABLE' ? totalRounds * 8 : problemCount);
+    const isDataExam = examType === 'TABLE' || examType === 'PLOT';
+    const hasPlots = results.some(r => r.problem?.isPlot);
+    const totalSub = sessionResult?.totalCount || (isDataExam ? totalRounds * 8 : problemCount);
     const correctCount = sessionResult?.correctCount || 0;
     const averageTime = sessionResult?.averageTime || 0;
     const accuracy = sessionResult?.accuracy || 0;
@@ -13,7 +16,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
     const lastResult = results[results.length - 1];
     const incorrect = [];
 
-    if (examType === 'TABLE') {
+    if (isDataExam) {
         // 표 탐색 모드의 오답들 추출 (세트별로 묶음)
         results.forEach((r, roundIdx) => {
             const { problem, userInputs } = r;
@@ -40,6 +43,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                     type: 'TABLE',
                     round: roundIdx + 1,
                     tables: problem.tables,
+                    isPlot: problem.isPlot,
                     questions: wrongQuestions,
                 });
             }
@@ -63,7 +67,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
     }
 
     return (
-        <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
+        <div className={`min-h-screen p-4 md:p-8 ${hasPlots ? 'max-w-4xl' : 'max-w-2xl'} mx-auto`}>
             <div className="bg-white border border-black p-6 mb-8 text-center">
                 <h2 className="text-xl font-bold mb-6">[ 시험 결과 보고서 ]</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -79,7 +83,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                     </div>
                     <div className="border border-black p-4">
                         <div className="text-xs mb-1 font-bold">
-                            {examType === 'TABLE' ? '세트당 평균 소요 시간' : '총 소요 시간'}
+                            {isDataExam ? '세트당 평균 소요 시간' : '총 소요 시간'}
                         </div>
                         <div className="text-xl font-bold">{averageTime}초</div>
                     </div>
@@ -97,6 +101,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                     <div className="space-y-6">
                         {incorrect.map((item, i) => {
                             if (item.type === 'TABLE') {
+                                const Display = item.isPlot ? LinePlot : DataTable;
                                 return (
                                     <div key={i} className="border border-gray-300 p-4 text-left">
                                         <h4 className="font-bold text-lg mb-3">
@@ -104,10 +109,11 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                         </h4>
                                         <div className="flex flex-col gap-4 mb-4">
                                             {item.tables.map((tObj, tIdx) => (
-                                                <DataTable
+                                                <Display
                                                     key={tIdx}
                                                     template={tObj.template}
                                                     data={tObj.data}
+                                                    colors={tObj.colors}
                                                     size="small"
                                                 />
                                             ))}
@@ -128,7 +134,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                         <strong>입력:</strong>{' '}
                                                         <span
                                                             className={
-                                                                q.u1 !== q.a1
+                                                                Number(q.u1) !== q.a1
                                                                     ? 'text-red-600 line-through'
                                                                     : 'text-blue-600 font-bold'
                                                             }
@@ -140,7 +146,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                                 ,{' '}
                                                                 <span
                                                                     className={
-                                                                        q.u2 !== q.a2
+                                                                        Number(q.u2) !== q.a2
                                                                             ? 'text-red-600 line-through'
                                                                             : 'text-blue-600 font-bold'
                                                                     }

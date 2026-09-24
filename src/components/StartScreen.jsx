@@ -28,8 +28,10 @@ const StartScreen = ({
                         value={examType}
                         onChange={(e) => setExamType(e.target.value)}
                     >
-                        <option value="TABLE">표 탐색 (기존)</option>
+                        <option value="TABLE">자료 읽기 (표 · 그래프)</option>
                         <option value="PATTERN">규칙 찾기 (GSAT)</option>
+                        <option value="SEQUENCE">수열추리</option>
+                        <option value="ADDITION">네 수 더하기 (100~9999)</option>
                     </select>
                 </div>
                 <div className="mb-4">
@@ -58,13 +60,21 @@ const StartScreen = ({
                     <div className="mt-12 border-t border-black pt-8">
                         <h2 className="text-xl font-bold mb-4">[ 내 기록 변화 ]</h2>
                         <div className="mb-6">
-                            <h3 className="text-lg font-semibold mb-2">표 탐색 기록</h3>
-                            <HistoryChart history={history.filter((r) => r.examType === 'TABLE')} />
+                            <h3 className="text-lg font-semibold mb-2">자료 읽기 기록 (표 · 그래프)</h3>
+                            <HistoryChart history={history.filter((r) => ['TABLE', 'PLOT'].includes(r.examType))} />
                         </div>
 
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold mb-2">규칙 찾기 기록</h3>
                             <HistoryChart history={history.filter((r) => r.examType === 'PATTERN')} />
+                        </div>
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">수열추리 기록</h3>
+                            <HistoryChart history={history.filter((r) => r.examType === 'SEQUENCE')} />
+                        </div>
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold mb-2">네 수 더하기 기록</h3>
+                            <HistoryChart history={history.filter((r) => r.examType === 'ADDITION')} />
                         </div>
                         <div className="text-xs text-gray-500 mt-2 mb-6 text-right">
                             * 최근 20회 기록 표시

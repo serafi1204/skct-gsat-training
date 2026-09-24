@@ -1,5 +1,6 @@
 import React from 'react';
 import DataTable from './DataTable';
+import LinePlot from './LinePlot';
 
 /**
  * 표 탐색 풀이 화면
@@ -14,9 +15,11 @@ const TablePlaying = ({
     onNext,
     inputRefs,
     submitBtnRef,
+    isPlot = false,
 }) => {
+    const Display = isPlot ? LinePlot : DataTable;
     return (
-        <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto flex flex-col">
+        <div className={`min-h-screen p-4 md:p-8 ${isPlot ? 'max-w-4xl' : 'max-w-2xl'} mx-auto flex flex-col`}>
             <div className="flex justify-between items-center mb-6 border-b border-black pb-4">
                 <div className="flex items-center gap-4">
                     <h2 className="text-xl font-bold">
@@ -24,19 +27,20 @@ const TablePlaying = ({
                     </h2>
                 </div>
                 <div className="text-sm font-bold text-gray-500 hidden md:block">
-                    SKCT 실행역량 / 수리 대비
+                    {isPlot ? '그래프 읽기' : 'SKCT 실행역량 / 수리 대비'}
                 </div>
             </div>
             <div className="mb-6 font-bold text-sm">
-                ※ 다음 표의 데이터를 바탕으로 하단 각 지문이 가리키는 수치를 순서대로
+                ※ 다음 {isPlot ? '그래프' : '표'}의 데이터를 바탕으로 하단 각 지문이 가리키는 수치를 순서대로
                 기입하시오. (정답 입력 시 콤마 제외)
             </div>
             <div className="flex flex-col gap-8 mb-8">
                 {tableProblem.tables.map((tObj, tIdx) => (
-                    <DataTable
+                    <Display
                         key={tIdx}
                         template={tObj.template}
                         data={tObj.data}
+                        colors={tObj.colors}
                         size="normal"
                     />
                 ))}
@@ -63,7 +67,7 @@ const TablePlaying = ({
                                 onChange={(e) => onInputChange(idx * 2, e.target.value)}
                                 onKeyDown={(e) => onKeyDown(e, idx * 2)}
                                 className="w-16 p-1 border border-black text-center outline-none focus:ring-1 focus:ring-black font-bold text-base bg-blue-50 focus:bg-white"
-                                autoFocus={idx === 0}
+                                autoFocus={!isPlot && idx === 0}
                             />
                             {q.answer2 !== undefined && q.answer2 !== null && (
                                 <input

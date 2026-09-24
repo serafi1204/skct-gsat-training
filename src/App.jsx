@@ -5,11 +5,15 @@ import StartScreen from './components/StartScreen';
 import TablePlaying from './components/TablePlaying';
 import PatternPlaying from './components/PatternPlaying';
 import ResultScreen from './components/ResultScreen';
+import SequenceTraining from './components/SequenceTraining';
+import { generateSequenceProblems } from './utils/generateSequenceProblems';
+import { generateAdditionProblems } from './utils/generateAdditionProblems';
 
 const App = () => {
     // 공통 상태
     const [gameState, setGameState] = useState('START');
     const [examType, setExamType] = useState('TABLE'); // TABLE or PATTERN
+    const isDataExam = examType === 'TABLE';
     const [totalRounds, setTotalRounds] = useState(5);
     const [problemCount, setProblemCount] = useState(20);
     const [currentRound, setCurrentRound] = useState(0);
@@ -21,6 +25,7 @@ const App = () => {
     const [results, setResults] = useState([]);
     const [roundStartTime, setRoundStartTime] = useState(0);
     const [history, setHistory] = useState([]);
+    const [sequenceProblems, setSequenceProblems] = useState([]);
 
     // 세션 최종 결과용 상태 (채점 로직 버그 해결용)
     const [sessionResult, setSessionResult] = useState(null);
@@ -35,7 +40,10 @@ const App = () => {
     }, []);
 
     const handleStart = () => {
-        if (examType === 'TABLE') {
+        if (examType === 'SEQUENCE' || examType === 'ADDITION') {
+            setSequenceProblems(examType === 'ADDITION' ? generateAdditionProblems(problemCount) : generateSequenceProblems(problemCount));
+            setGameState('PLAYING');
+        } else if (isDataExam) {
             const numTwoTables = Math.floor(totalRounds / 2);
             const seq = Array(totalRounds).fill(false);
             for (let i = 0; i < numTwoTables; i++) seq[i] = true;
@@ -47,7 +55,7 @@ const App = () => {
             setProblemSequence(seq);
             setResults([]);
             setCurrentRound(0);
-            setTableProblem(generateTableProblem(seq[0]));
+            setTableProblem(generateTableProblem(seq[0], { plot: Math.random() < 0.5 }));
             setUserInputs(Array(8).fill(''));
             setRoundStartTime(Date.now());
             setGameState('PLAYING');
@@ -80,7 +88,7 @@ const App = () => {
     const handleKeyDown = (e, idx) => {
         if (e.key === 'Enter') {
             e.preventDefault(); // 엔터 기본 동작 차단
-            if (examType === 'TABLE') {
+            if (isDataExam) {
                 if (idx < 7) {
                     let nextIdx = idx + 1;
                     // 숨겨진 입력창 건너뛰기
@@ -107,7 +115,7 @@ const App = () => {
 
     const handleNext = () => {
         const timeTaken = (Date.now() - roundStartTime) / 1000;
-        if (examType === 'TABLE') {
+        if (isDataExam) {
             const newResults = [...results, { problem: tableProblem, userInputs: [...userInputs], timeTaken }];
             setResults(newResults);
             if (currentRound + 1 >= totalRounds) {
@@ -115,7 +123,7 @@ const App = () => {
             } else {
                 const next = currentRound + 1;
                 setCurrentRound(next);
-                setTableProblem(generateTableProblem(problemSequence[next]));
+                setTableProblem(generateTableProblem(problemSequence[next], { plot: Math.random() < 0.5 }));
                 setUserInputs(Array(8).fill(''));
                 setRoundStartTime(Date.now());
                 setTimeout(() => inputRefs.current[0]?.focus(), 50);
@@ -133,7 +141,7 @@ const App = () => {
         let totalTime = 0;
         finalResults.forEach((r) => {
             totalTime += r.timeTaken;
-            if (examType === 'TABLE') {
+            if (isDataExam) {
                 const { problem, userInputs } = r;
                 problem.questions.forEach((q, qIdx) => {
                     if (Number(userInputs[qIdx * 2]) === q.answer1) totalCorrect++;
@@ -154,7 +162,7 @@ const App = () => {
         });
 
         // TABLE의 totalSub는 위 루프에서 동적으로 계산됨
-        if (examType !== 'TABLE') {
+        if (!isDataExam) {
             totalSub = problemCount;
         }
 
@@ -199,9 +207,26 @@ const App = () => {
     }
 
     if (gameState === 'PLAYING') {
-        if (examType === 'TABLE') {
+        if (examType === 'SEQUENCE' || examType === 'ADDITION') {
+            return (
+                <SequenceTraining
+                    examType={examType}
+                    title={examType === 'ADDITION' ? '네 수 더하기' : undefined}
+                    instruction={examType === 'ADDITION' ? '100~9999 사이의 네 수를 모두 더한 값을 입력하세요. (콤마 제외)' : undefined}
+                    problems={sequenceProblems}
+                    onComplete={(record) => {
+                        const existing = JSON.parse(localStorage.getItem('skctHistory') || '[]');
+                        const updated = [...existing, record];
+                        localStorage.setItem('skctHistory', JSON.stringify(updated));
+                        setHistory(updated);
+                    }}
+                    onRestart={() => setGameState('START')}
+                />
+            );
+        } else if (isDataExam) {
             return (
                 <TablePlaying
+                    isPlot={tableProblem.isPlot}
                     currentRound={currentRound}
                     totalRounds={totalRounds}
                     tableProblem={tableProblem}
