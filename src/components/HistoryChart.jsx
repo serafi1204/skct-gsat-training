@@ -6,7 +6,8 @@ import { Chart } from 'chart.js/auto';
  * @param {Object} props
  * @param {Array<{accuracy: number, averageTime: number}>} props.history
  */
-const HistoryChart = ({ history }) => {
+const HistoryChart = ({ history, metric = 'accuracy' }) => {
+    const metricLabel = metric === 'averageErrorRate' ? '평균 오차율 (%, 낮을수록 좋음)' : '정답률 (%)';
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -22,8 +23,8 @@ const HistoryChart = ({ history }) => {
                 labels: displayHistory.map((_, i) => `${i + 1}회`),
                 datasets: [
                     {
-                        label: '정답률 (%)',
-                        data: displayHistory.map((h) => h.accuracy),
+                        label: metricLabel,
+                        data: displayHistory.map((h) => h[metric] ?? null),
                         borderColor: '#000',
                         backgroundColor: '#000',
                         yAxisID: 'y',
@@ -49,8 +50,8 @@ const HistoryChart = ({ history }) => {
                         display: true,
                         position: 'left',
                         min: 0,
-                        max: 100,
-                        title: { display: true, text: '정답률 (%)' },
+                        ...(metric === 'accuracy' ? { max: 100 } : {}),
+                        title: { display: true, text: metricLabel },
                     },
                     y1: {
                         type: 'linear',
@@ -66,7 +67,7 @@ const HistoryChart = ({ history }) => {
         return () => {
             if (chartInstance.current) chartInstance.current.destroy();
         };
-    }, [history]);
+    }, [history, metric, metricLabel]);
 
     return <canvas ref={chartRef}></canvas>;
 };

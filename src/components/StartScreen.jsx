@@ -74,7 +74,8 @@ const StartScreen = ({
                         </div>
                         <div className="mb-6">
                             <h3 className="text-lg font-semibold mb-2">네 수 더하기 기록</h3>
-                            <HistoryChart history={history.filter((r) => r.examType === 'ADDITION')} />
+                            <HistoryChart metric="averageErrorRate" history={history.filter((r) => r.examType === 'ADDITION')} />
+                            <p className="text-xs text-gray-500 mt-2">평균 오차율은 유효 응답 기준입니다. 이전 정답률 기록과 유효 응답이 없는 회차는 오차율이 표시되지 않습니다.</p>
                         </div>
                         <div className="text-xs text-gray-500 mt-2 mb-6 text-right">
                             * 최근 20회 기록 표시

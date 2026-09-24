@@ -1,8 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { isSequenceAnswerCorrect } from '../utils/generateSequenceProblems';
+import { additionErrorRate, summarizeAddition } from '../utils/additionScoring';
 
 export default function SequenceTraining({ problems, onComplete, onRestart, examType = 'SEQUENCE', title = '수열추리', instruction = '수열의 규칙을 찾아 마지막 빈칸에 들어갈 수를 입력하세요.' }) {
     const promptFor = (p) => p.prompt ?? `${p.values.slice(0, -1).join(', ')}, ?`;
+    const useErrorRate = examType === 'ADDITION';
+    const formatError = rate => rate === null ? '산출 불가' : `${rate.toFixed(2)}%`;
     const [index, setIndex] = useState(0);
     const [input, setInput] = useState('');
     const [results, setResults] = useState([]);
@@ -18,7 +21,7 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
         submitted.current = true;
         const nextResults = [...results, {
             problem, input,
-            correct: isSequenceAnswerCorrect(input, problem.answer),
+            ...(useErrorRate ? { errorRate: additionErrorRate(input, problem.answer) } : { correct: isSequenceAnswerCorrect(input, problem.answer) }),
             timeTaken: (Date.now() - startedAt.current) / 1000,
         }];
         setResults(nextResults);
@@ -28,7 +31,7 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
             onComplete({
                 examType,
                 date: new Date().toLocaleString('ko-KR'),
-                accuracy: Math.round(correctCount / problems.length * 100),
+                ...(useErrorRate ? summarizeAddition(nextResults) : { accuracy: Math.round(correctCount / problems.length * 100) }),
                 averageTime: Number((nextResults.reduce((sum, r) => sum + r.timeTaken, 0) / problems.length).toFixed(1)),
             });
         } else {
@@ -43,22 +46,29 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
     if (finished) {
         const correctCount = results.filter(r => r.correct).length;
         const totalTime = results.reduce((sum, r) => sum + r.timeTaken, 0);
+        const summary = useErrorRate ? summarizeAddition(results) : null;
         return (
             <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
                 <section className="bg-white border border-black p-6 text-center mb-8">
                     <h1 className="text-xl font-bold mb-6">{title} 연습 결과</h1>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <p>정답률<br /><strong>{Math.round(correctCount / problems.length * 100)}%</strong></p>
-                        <p>맞힌 개수<br /><strong>{correctCount} / {problems.length}</strong></p>
+                        {useErrorRate ? <>
+                            <p>평균 오차율<br /><strong>{formatError(summary.averageErrorRate)}</strong></p>
+                            <p>유효 응답<br /><strong>{summary.validCount} / {problems.length}</strong></p>
+                        </> : <>
+                            <p>정답률<br /><strong>{Math.round(correctCount / problems.length * 100)}%</strong></p>
+                            <p>맞힌 개수<br /><strong>{correctCount} / {problems.length}</strong></p>
+                        </>}
                         <p>문제당 평균 시간<br /><strong>{(totalTime / problems.length).toFixed(1)}초</strong></p>
                     </div>
+                    {useErrorRate && <p className="text-sm mb-6">오차율 = |입력값 − 정답| ÷ 정답 × 100. 낮을수록 정확합니다.<br />미응답·잘못된 입력 {summary.invalidCount}개는 평균에서 제외합니다.</p>}
                     <button onClick={onRestart} className="bg-black text-white py-2 px-8">처음으로</button>
                 </section>
                 <h2 className="text-lg font-bold mb-4">정답 및 해설</h2>
                 <div className="space-y-4">
                     {results.map((result, i) => (
                         <section key={i} className="bg-white border border-black p-4">
-                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · {result.correct ? '정답' : '오답'}</h3>
+                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · {useErrorRate ? `오차율 ${formatError(result.errorRate)}` : result.correct ? '정답' : '오답'}</h3>
                             <p className="font-mono mb-2 break-words">{promptFor(result.problem)}</p>
                             <p className="text-sm mb-2">입력: {result.input.trim() || '(공백)'} / 정답: {result.problem.answer}</p>
                             <p className="text-sm leading-relaxed">{result.problem.explanation}</p>
@@ -76,6 +86,7 @@ export default function SequenceTraining({ problems, onComplete, onRestart, exam
                 <p aria-live="polite">{index + 1} / {problems.length}문제</p>
             </header>
             <p className="text-sm mb-6">{instruction}</p>
+            {useErrorRate && <p className="text-sm mb-4 text-gray-600">정답과의 오차율로 평가합니다. 0%에 가까울수록 정확합니다.</p>}
             <div className="bg-white border border-black p-6 mb-8 text-xl font-mono leading-loose break-words" aria-label="문제">
                 {promptFor(problem)}
             </div>
