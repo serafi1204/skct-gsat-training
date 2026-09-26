@@ -37,6 +37,8 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
     const selectedHistory = modeHistory(history, historyMode);
     const count = examType === 'TABLE' ? totalRounds : problemCount;
     const countKey = examType === 'TABLE' ? 'totalRounds' : 'problemCount';
+    const timeLabel = historyMode === 'TABLE' ? '최근 세트당 시간' : historyMode === 'PATTERN' ? '최근 전체 소요 시간' : '최근 문항당 시간';
+    const chartTimeLabel = historyMode === 'TABLE' ? '세트당 평균 시간 (초)' : historyMode === 'PATTERN' ? '전체 소요 시간 (초)' : '문항당 평균 시간 (초)';
 
     return (
         <div className="app-shell">
@@ -73,8 +75,8 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                     <section className="surface setup-panel" aria-labelledby="setup-heading">
                         <div className="section-heading"><div><span className="eyebrow">시작 설정</span><h2 id="setup-heading">{selectedMode.name} 준비</h2></div><span>설정은 자동 저장됩니다</span></div>
                         <div className="setup-row">
-                            <div><h3>문제 수</h3><p>{examType === 'TABLE' ? '한 세트에 4문항이 포함됩니다.' : '원하는 만큼 반복해 보세요.'}</p></div>
-                            <div className="count-options" role="group" aria-label="문제 수">
+                            <div><h3>{examType === 'TABLE' ? '세트 수' : '문제 수'}</h3><p>{examType === 'TABLE' ? '한 세트에 4문항이 포함됩니다.' : '원하는 만큼 반복해 보세요.'}</p></div>
+                            <div className="count-options" role="group" aria-label={examType === 'TABLE' ? '세트 수' : '문제 수'}>
                                 {[5, 10, 20, 30].map(value => <button key={value} type="button" aria-pressed={count === value}
                                     className={count === value ? 'selected' : ''} onClick={() => onPreferenceChange(countKey, value)}>{value}</button>)}
                             </div>
@@ -102,8 +104,8 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                             {modes.map(mode => <button key={mode.id} type="button" className={historyMode === mode.id ? 'active' : ''} aria-pressed={historyMode === mode.id} onClick={() => setHistoryMode(mode.id)}>{mode.name}</button>)}
                         </div>
                         {selectedHistory.length === 0 ? <div className="empty-state"><span aria-hidden="true">◌</span><h3>아직 기록이 없습니다</h3><p>이 유형을 한 번 연습하면 변화가 여기에 표시됩니다.</p><button type="button" className="secondary-button" onClick={() => { onPreferenceChange('examType', historyMode); setView('practice'); }}>이 유형 연습하기</button></div> : <>
-                            <div className="history-summary"><div><span>완료한 훈련</span><strong>{selectedHistory.length}회</strong></div><div><span>최근 평균 시간</span><strong>{selectedHistory.at(-1)?.averageTime ?? '—'}초</strong></div></div>
-                            <div className="chart-area">{historyMode === 'ADDITION' ? <CalculationHistory history={selectedHistory} /> : <HistoryChart history={selectedHistory} />}</div>
+                            <div className="history-summary"><div><span>완료한 훈련</span><strong>{selectedHistory.length}회</strong></div><div><span>{timeLabel}</span><strong>{selectedHistory.at(-1)?.averageTime ?? '—'}초</strong></div></div>
+                            <div className="chart-area">{historyMode === 'ADDITION' ? <CalculationHistory history={selectedHistory} /> : <HistoryChart history={selectedHistory} timeLabel={chartTimeLabel} />}</div>
                             <p className="helper-text">그래프에는 최근 20회 기록이 표시됩니다.</p>
                         </>}
                     </section>

@@ -97,7 +97,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
             </div>
             {incorrect.length > 0 && (
                 <div>
-                    <h3 className="review-heading">오답 노트 <span className="text-sm font-normal text-slate-500">· 다시 확인할 문항 {incorrect.length}세트</span></h3>
+                    <h3 className="review-heading">오답 노트 <span className="text-sm font-normal text-slate-500">· 다시 확인할 {isDataExam ? '세트' : '문항'} {incorrect.length}개</span></h3>
                     <div className="space-y-6">
                         {incorrect.map((item, i) => {
                             if (item.type === 'TABLE') {
@@ -136,7 +136,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                             className={
                                                                 Number(q.u1) !== q.a1
                                                                     ? 'text-red-600 line-through'
-                                                                    : 'text-blue-600 font-bold'
+                                                                    : 'text-teal-700 font-bold'
                                                             }
                                                         >
                                                             {q.u1}
@@ -148,7 +148,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                                     className={
                                                                         Number(q.u2) !== q.a2
                                                                             ? 'text-red-600 line-through'
-                                                                            : 'text-blue-600 font-bold'
+                                                                            : 'text-teal-700 font-bold'
                                                                     }
                                                                 >
                                                                     {q.u2}
@@ -170,7 +170,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                 {item.ruleInput}
                                             </span>
                                             <span className="mx-2 text-gray-400">→</span>
-                                            <span className="text-blue-600 font-bold mx-1">{item.symbol}</span>
+                                            <span className="text-teal-700 font-bold mx-1">{item.symbol}</span>
                                             <span className="mx-2 text-gray-400">→</span>
                                             <span className="font-mono font-bold tracking-wider">
                                                 {item.ruleOutput}
@@ -182,7 +182,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                                 {item.questionInput}
                                             </span>
                                             <span className="mx-2 text-gray-400">→</span>
-                                            <span className="text-blue-600 font-bold mx-1">{item.symbol}</span>
+                                            <span className="text-teal-700 font-bold mx-1">{item.symbol}</span>
                                             <span className="mx-2 text-gray-400">→</span>
                                             <span className="font-mono font-bold tracking-wider">
                                                 {item.answer}

@@ -23,7 +23,7 @@ const TablePlaying = ({
     return (
         <div className="practice-page">
           <div className="practice-container">
-            <PracticeHeader title="자료 읽기" current={currentRound + 1} total={totalRounds} caption={isPlot ? '선 그래프 연습' : '표 탐색 연습'} onExit={onExit} />
+            <PracticeHeader title="자료 읽기" current={currentRound + 1} total={totalRounds} caption={isPlot ? '선 그래프 · 세트 진행' : '표 탐색 · 세트 진행'} onExit={onExit} />
             <p className="instruction">{isPlot ? '그래프' : '표'}에서 지문이 가리키는 수치를 찾아 순서대로 입력하세요. 콤마는 생략해도 됩니다.</p>
             <div className="flex flex-col gap-5 mb-6">
                 {tableProblem.tables.map((tObj, tIdx) => (
