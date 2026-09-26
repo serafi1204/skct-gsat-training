@@ -29,6 +29,7 @@ test('all four types have valid values and unambiguous O/X claims', () => {
                         const rates = problem.pairs.map(([a, b]) => (b - a) / a * 100);
                         const gap = Math.abs(rates[0] - rates[1]);
                         assert.ok(gap >= 0.5 && gap <= 1);
+                        assert.ok(Math.abs(Number(rates[0].toFixed(2)) - Number(rates[1].toFixed(2))) >= 0.5);
                         assert.equal(problem.answer, problem.claim === (rates[0] > rates[1] ? 1 : 2) ? 'O' : 'X');
                     } else {
                         const exact = problem.type === 'average' ? sum / 4 : problem.values[problem.targetIndex] / sum * 100;
@@ -42,6 +43,24 @@ test('all four types have valid values and unambiguous O/X claims', () => {
         assert.ok(Object.values(counts).every(n => n > 600 && n < 900));
         assert.ok(choices.O > 800 && choices.X > 800);
     } finally { Math.random = original; }
+});
+
+test('growth gaps remain at least 0.5 percentage points for every supported number range', () => {
+    let checked = 0;
+    for (const min of [100, 500, 1000, 2000, 3000]) {
+        for (const max of [7000, 8000, 9000, 9999]) {
+            for (let batch = 0; batch < 20; batch++) {
+                for (const problem of generateAdditionProblems(30, { min, max })) {
+                    if (problem.type !== 'growth') continue;
+                    checked++;
+                    const [first, second] = problem.pairs.map(([before, after]) => (after - before) / before * 100);
+                    assert.ok(Math.abs(first - second) >= 0.5);
+                    assert.ok(Math.abs(Number(first.toFixed(2)) - Number(second.toFixed(2))) >= 0.5);
+                }
+            }
+        }
+    }
+    assert.ok(checked > 1000);
 });
 
 test('only sums use numeric error; other types keep separate O/X accuracy', () => {

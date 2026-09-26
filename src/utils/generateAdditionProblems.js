@@ -22,12 +22,17 @@ function proposedValue(exact, decimals) {
 function growthProblem(min, max) {
     for (let attempt = 0; attempt < 1000; attempt++) {
         const rate = int(100, Math.min(8000, Math.floor((max / min - 1.02) * 10000))) / 10000;
-        const gap = int(50, 100) / 10000;
+        // Aim inside the allowed interval so rounding the displayed numbers
+        // cannot make the two growth rates appear less than 0.5%p apart.
+        const gap = int(60, 90) / 10000;
         const bases = [int(min, Math.floor(max / (1 + rate))), int(min, Math.floor(max / (1 + rate + gap)))];
         const pairs = bases.map((base, i) => [base, Math.round(base * (1 + rate + i * gap))]);
         const growthRates = pairs.map(([before, after]) => (after - before) / before * 100);
         const actualGap = Math.abs(growthRates[1] - growthRates[0]);
-        if (actualGap < 0.5 || actualGap > 1 || pairs.flat().some(v => v < min || v > max)) continue;
+        const displayedRates = growthRates.map(value => Number(value.toFixed(2)));
+        const displayedGap = Math.abs(displayedRates[1] - displayedRates[0]);
+        if (actualGap < 0.55 || actualGap > 1 || displayedGap < 0.5
+            || pairs.flat().some(v => v < min || v > max)) continue;
         if (Math.random() < 0.5) { pairs.reverse(); growthRates.reverse(); }
         const winner = growthRates[0] > growthRates[1] ? 1 : 2;
         const claim = int(1, 2);
