@@ -1,6 +1,7 @@
 import React from 'react';
 import DataTable from './DataTable';
 import LinePlot from './LinePlot';
+import PracticeHeader from './PracticeHeader';
 
 /**
  * 표 탐색 풀이 화면
@@ -16,25 +17,15 @@ const TablePlaying = ({
     inputRefs,
     submitBtnRef,
     isPlot = false,
+    onExit,
 }) => {
     const Display = isPlot ? LinePlot : DataTable;
     return (
-        <div className={`min-h-screen p-4 md:p-8 ${isPlot ? 'max-w-4xl' : 'max-w-2xl'} mx-auto flex flex-col`}>
-            <div className="flex justify-between items-center mb-6 border-b border-black pb-4">
-                <div className="flex items-center gap-4">
-                    <h2 className="text-xl font-bold">
-                        [ 문항 {currentRound + 1} / {totalRounds} ]
-                    </h2>
-                </div>
-                <div className="text-sm font-bold text-gray-500 hidden md:block">
-                    {isPlot ? '그래프 읽기' : 'SKCT 실행역량 / 수리 대비'}
-                </div>
-            </div>
-            <div className="mb-6 font-bold text-sm">
-                ※ 다음 {isPlot ? '그래프' : '표'}의 데이터를 바탕으로 하단 각 지문이 가리키는 수치를 순서대로
-                기입하시오. (정답 입력 시 콤마 제외)
-            </div>
-            <div className="flex flex-col gap-8 mb-8">
+        <div className="practice-page">
+          <div className="practice-container">
+            <PracticeHeader title="자료 읽기" current={currentRound + 1} total={totalRounds} caption={isPlot ? '선 그래프 연습' : '표 탐색 연습'} onExit={onExit} />
+            <p className="instruction">{isPlot ? '그래프' : '표'}에서 지문이 가리키는 수치를 찾아 순서대로 입력하세요. 콤마는 생략해도 됩니다.</p>
+            <div className="flex flex-col gap-5 mb-6">
                 {tableProblem.tables.map((tObj, tIdx) => (
                     <Display
                         key={tIdx}
@@ -45,14 +36,14 @@ const TablePlaying = ({
                     />
                 ))}
             </div>
-            <div className="flex flex-col gap-3 flex-grow border-t border-black pt-6">
+            <div className="question-card flex flex-col gap-4">
                 {tableProblem.questions.map((q, idx) => (
                     <div
                         key={idx}
-                        className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gray-200 pb-3 last:border-0"
+                        className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4 last:border-0 last:pb-0"
                     >
                         <div className="flex items-start md:items-center gap-2 flex-grow">
-                            <div className="font-bold w-5 flex-shrink-0 text-right text-sm">
+                            <div className="font-bold w-5 flex-shrink-0 text-right text-sm text-teal-700">
                                 {idx + 1}.
                             </div>
                             <span className="font-medium text-sm pr-2 leading-tight">
@@ -66,7 +57,8 @@ const TablePlaying = ({
                                 value={userInputs[idx * 2]}
                                 onChange={(e) => onInputChange(idx * 2, e.target.value)}
                                 onKeyDown={(e) => onKeyDown(e, idx * 2)}
-                                className="w-16 p-1 border border-black text-center outline-none focus:ring-1 focus:ring-black font-bold text-base bg-blue-50 focus:bg-white"
+                                className="answer-input w-20 text-base"
+                                aria-label={`${idx + 1}번 첫 번째 수치`}
                                 autoFocus={!isPlot && idx === 0}
                             />
                             {q.answer2 !== undefined && q.answer2 !== null && (
@@ -76,22 +68,24 @@ const TablePlaying = ({
                                     value={userInputs[idx * 2 + 1]}
                                     onChange={(e) => onInputChange(idx * 2 + 1, e.target.value)}
                                     onKeyDown={(e) => onKeyDown(e, idx * 2 + 1)}
-                                    className="w-16 p-1 border border-black text-center outline-none focus:ring-1 focus:ring-black font-bold text-base bg-blue-50 focus:bg-white"
+                                    className="answer-input w-20 text-base"
+                                    aria-label={`${idx + 1}번 두 번째 수치`}
                                 />
                             )}
                         </div>
                     </div>
                 ))}
             </div>
-            <div className="mt-8 flex justify-end">
+            <div className="answer-actions">
                 <button
                     ref={submitBtnRef}
                     onClick={onNext}
-                    className="border border-black bg-white hover:bg-black hover:text-white text-black font-bold py-2 px-6 transition duration-200 text-sm shadow-sm"
+                    className="primary-button"
                 >
                     {currentRound + 1 === totalRounds ? '시험 종료' : '다음 문항 (Enter)'}
                 </button>
             </div>
+          </div>
         </div>
     );
 };

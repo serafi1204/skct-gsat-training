@@ -7,7 +7,6 @@ import LinePlot from './LinePlot';
  */
 const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCount, onRestart }) => {
     const isDataExam = examType === 'TABLE' || examType === 'PLOT';
-    const hasPlots = results.some(r => r.problem?.isPlot);
     const totalSub = sessionResult?.totalCount || (isDataExam ? totalRounds * 8 : problemCount);
     const correctCount = sessionResult?.correctCount || 0;
     const averageTime = sessionResult?.averageTime || 0;
@@ -67,43 +66,44 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
     }
 
     return (
-        <div className={`min-h-screen p-4 md:p-8 ${hasPlots ? 'max-w-4xl' : 'max-w-2xl'} mx-auto`}>
-            <div className="bg-white border border-black p-6 mb-8 text-center">
-                <h2 className="text-xl font-bold mb-6">[ 시험 결과 보고서 ]</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="border border-black p-4">
-                        <div className="text-xs mb-1 font-bold">정답률</div>
-                        <div className="text-xl font-bold">{accuracy}%</div>
+        <div className="practice-page"><div className="practice-container">
+            <div className="result-hero">
+                <span className="eyebrow">훈련 완료</span>
+                <h2>오늘의 연습 결과</h2>
+                <div className="metric-grid">
+                    <div className="metric-card">
+                        <span>정답률</span>
+                        <strong>{accuracy}%</strong>
                     </div>
-                    <div className="border border-black p-4">
-                        <div className="text-xs mb-1 font-bold">맞힌 개수</div>
-                        <div className="text-xl font-bold">
+                    <div className="metric-card">
+                        <span>맞힌 개수</span>
+                        <strong>
                             {correctCount} / {totalSub}
-                        </div>
+                        </strong>
                     </div>
-                    <div className="border border-black p-4">
-                        <div className="text-xs mb-1 font-bold">
+                    <div className="metric-card">
+                        <span>
                             {isDataExam ? '세트당 평균 소요 시간' : '총 소요 시간'}
-                        </div>
-                        <div className="text-xl font-bold">{averageTime}초</div>
+                        </span>
+                        <strong>{averageTime}초</strong>
                     </div>
                 </div>
                 <button
                     onClick={onRestart}
-                    className="bg-black text-white font-bold py-2 px-8 hover:bg-gray-800 transition duration-200 text-sm"
+                    className="primary-button"
                 >
-                    다시 시작
+                    다른 훈련하기
                 </button>
             </div>
             {incorrect.length > 0 && (
-                <div className="bg-white border border-black p-6">
-                    <h3 className="text-lg font-bold mb-4">오답 노트</h3>
+                <div>
+                    <h3 className="review-heading">오답 노트 <span className="text-sm font-normal text-slate-500">· 다시 확인할 문항 {incorrect.length}세트</span></h3>
                     <div className="space-y-6">
                         {incorrect.map((item, i) => {
                             if (item.type === 'TABLE') {
                                 const Display = item.isPlot ? LinePlot : DataTable;
                                 return (
-                                    <div key={i} className="border border-gray-300 p-4 text-left">
+                                    <div key={i} className="review-card text-left">
                                         <h4 className="font-bold text-lg mb-3">
                                             세트 {item.round} 오답
                                         </h4>
@@ -163,7 +163,7 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                                 );
                             } else if (item.type === 'PATTERN') {
                                 return (
-                                    <div key={i} className="border border-gray-300 p-3 text-left">
+                                    <div key={i} className="review-card text-left">
                                         <div className="mb-1">
                                             <strong>규칙:</strong>{' '}
                                             <span className="font-mono font-bold tracking-wider">
@@ -202,7 +202,8 @@ const ResultScreen = ({ examType, results, sessionResult, totalRounds, problemCo
                     </div>
                 </div>
             )}
-        </div>
+            {incorrect.length === 0 && <div className="empty-state mt-6"><span aria-hidden="true">✓</span><h3>모두 정확하게 풀었습니다</h3><p>새로운 문제로 한 번 더 도전해 보세요.</p></div>}
+        </div></div>
     );
 };
 

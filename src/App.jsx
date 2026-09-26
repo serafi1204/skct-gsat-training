@@ -9,6 +9,7 @@ import SequenceTraining from './components/SequenceTraining';
 import { generateSequenceProblems } from './utils/generateSequenceProblems';
 import { generateAdditionProblems } from './utils/generateAdditionProblems';
 import CalculationTraining from './components/CalculationTraining';
+import ConfirmDialog from './components/ConfirmDialog';
 import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
 
 const App = () => {
@@ -27,6 +28,7 @@ const App = () => {
     const [roundStartTime, setRoundStartTime] = useState(0);
     const [history, setHistory] = useState([]);
     const [sequenceProblems, setSequenceProblems] = useState([]);
+    const [pendingAction, setPendingAction] = useState(null);
 
     // 세션 최종 결과용 상태 (채점 로직 버그 해결용)
     const [sessionResult, setSessionResult] = useState(null);
@@ -58,6 +60,18 @@ const App = () => {
         localStorage.setItem('skctHistory', JSON.stringify(updated));
         savePlotHistory(updated);
         setHistory(updated);
+    };
+
+    const handleExit = () => setPendingAction('exit');
+    const cancelPendingAction = () => setPendingAction(null);
+    const confirmPendingAction = () => {
+        if (pendingAction === 'exit') setGameState('START');
+        if (pendingAction === 'clearHistory') {
+            localStorage.removeItem('skctHistory');
+            clearPlotHistory();
+            setHistory([]);
+        }
+        setPendingAction(null);
     };
 
     const handleStart = () => {
@@ -211,42 +225,32 @@ const App = () => {
     };
 
     // ------------------- 화면 렌더링 -------------------
+    let screen = null;
     if (gameState === 'START') {
-        return (
-            <StartScreen
+        screen = <StartScreen
                 preferences={preferences}
                 onPreferenceChange={updatePreference}
                 onStart={handleStart}
                 history={history}
-                onClearHistory={() => {
-                    if (window.confirm('모든 훈련 기록을 초기화할까요? 삭제한 기록은 복구할 수 없습니다.')) {
-                        localStorage.removeItem('skctHistory');
-                        clearPlotHistory();
-                        setHistory([]);
-                    }
-                }}
-            />
-        );
-    }
-
-    if (gameState === 'PLAYING') {
+                onClearHistory={() => setPendingAction('clearHistory')}
+            />;
+    } else if (gameState === 'PLAYING') {
         if (examType === 'ADDITION') {
-            return <CalculationTraining
+            screen = <CalculationTraining
                 problems={sequenceProblems}
                 onComplete={saveRecord}
                 onRestart={() => setGameState('START')}
+                onExit={handleExit}
             />;
         } else if (examType === 'SEQUENCE') {
-            return (
-                <SequenceTraining
+            screen = <SequenceTraining
                     problems={sequenceProblems}
                     onComplete={saveRecord}
                     onRestart={() => setGameState('START')}
-                />
-            );
+                    onExit={handleExit}
+                />;
         } else if (isDataExam) {
-            return (
-                <TablePlaying
+            screen = <TablePlaying
                     isPlot={tableProblem.isPlot}
                     currentRound={currentRound}
                     totalRounds={totalRounds}
@@ -257,11 +261,10 @@ const App = () => {
                     onNext={handleNext}
                     inputRefs={inputRefs}
                     submitBtnRef={submitBtnRef}
-                />
-            );
+                    onExit={handleExit}
+                />;
         } else if (examType === 'PATTERN') {
-            return (
-                <PatternPlaying
+            screen = <PatternPlaying
                     problemCount={problemCount}
                     patternProblems={patternProblems}
                     patternInputs={patternInputs}
@@ -270,25 +273,31 @@ const App = () => {
                     onSubmit={handleNext}
                     inputRefs={inputRefs}
                     submitBtnRef={submitBtnRef}
-                />
-            );
+                    onExit={handleExit}
+                />;
         }
-    }
-
-    if (gameState === 'RESULT') {
-        return (
-            <ResultScreen
+    } else if (gameState === 'RESULT') {
+        screen = <ResultScreen
                 examType={examType}
                 results={results}
                 sessionResult={sessionResult}
                 totalRounds={totalRounds}
                 problemCount={problemCount}
                 onRestart={() => setGameState('START')}
-            />
-        );
+            />;
     }
 
-    return null;
+    return <>
+        {screen}
+        {pendingAction && <ConfirmDialog
+            title={pendingAction === 'exit' ? '훈련을 그만둘까요?' : '모든 기록을 초기화할까요?'}
+            description={pendingAction === 'exit' ? '진행 중인 답안은 저장되지 않습니다.' : '저장된 훈련 기록과 결과 그래프가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.'}
+            confirmLabel={pendingAction === 'exit' ? '그만두기' : '기록 삭제'}
+            destructive={pendingAction === 'clearHistory'}
+            onConfirm={confirmPendingAction}
+            onCancel={cancelPendingAction}
+        />}
+    </>;
 };
 
 export default App;

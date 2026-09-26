@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generateTableProblem } from './generateTableProblem.js';
+import { generateTableProblem, joinWithAnd } from './generateTableProblem.js';
+
+test('table question wording chooses the correct Korean conjunction', () => {
+    assert.equal(joinWithAnd('일본', '중화권'), '일본과 중화권');
+    assert.equal(joinWithAnd('국내총괄', '글로벌총괄'), '국내총괄과 글로벌총괄');
+    assert.equal(joinWithAnd('서울', '인천'), '서울과 인천');
+    assert.equal(joinWithAnd('총계', '1분기'), '총계와 1분기');
+});
 
 test('plot legend darkens from left to right and series follow steady trends', () => {
     const shades = ['#303030', '#484848', '#606060', '#787878', '#909090', '#a8a8a8', '#c0c0c0'];

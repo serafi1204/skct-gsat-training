@@ -1,5 +1,11 @@
 import { ROW_CATEGORIES, COL_CATEGORIES } from '../data/categories.js';
 
+export const joinWithAnd = (first, second) => {
+    const last = first.charCodeAt(first.length - 1);
+    const hasBatchim = last >= 0xac00 && last <= 0xd7a3 && (last - 0xac00) % 28 !== 0;
+    return `${first}${hasBatchim ? '과' : '와'} ${second}`;
+};
+
 /**
  * 표 탐색 문제 생성
  * @param {boolean} isTwoTables - 2개 표 모드 여부
@@ -76,7 +82,7 @@ export const generateTableProblem = (isTwoTables, { plot = false, tableMin = 100
                 key = `row-${r}-${c1}-${c2}`;
                 const templates = [
                     `${table.template.cols[c1]} ${table.template.rows[r]}의 수치와 ${table.template.cols[c2]} 수치를 차례대로 적으시오.`,
-                    `${table.template.cols[c1]}과 ${table.template.cols[c2]} ${table.template.rows[r]}의 수치를 차례대로 적으시오.`,
+                    `${joinWithAnd(table.template.cols[c1], table.template.cols[c2])} ${table.template.rows[r]}의 수치를 차례대로 적으시오.`,
                     `${table.template.rows[r]}의 ${table.template.cols[c1]} 및 ${table.template.cols[c2]} 수치를 차례대로 적으시오.`,
                 ];
                 qObj = { text: randPick(templates), answer1: table.data[r][c1], answer2: table.data[r][c2] };
@@ -88,9 +94,9 @@ export const generateTableProblem = (isTwoTables, { plot = false, tableMin = 100
                 while (r1 === r2) r2 = Math.floor(Math.random() * table.template.rows.length);
                 key = `col-${c}-${r1}-${r2}`;
                 const templates = [
-                    `${table.template.cols[c]} ${table.template.rows[r1]}와 ${table.template.rows[r2]}의 수치를 차례대로 적으시오.`,
+                    `${table.template.cols[c]} ${joinWithAnd(table.template.rows[r1], table.template.rows[r2])}의 수치를 차례대로 적으시오.`,
                     `${table.template.cols[c]} ${table.template.rows[r1]}의 수치와 ${table.template.rows[r2]} 수치를 차례대로 적으시오.`,
-                    `${table.template.rows[r1]}와 ${table.template.rows[r2]}의 ${table.template.cols[c]} 수치를 차례대로 적으시오.`,
+                    `${joinWithAnd(table.template.rows[r1], table.template.rows[r2])}의 ${table.template.cols[c]} 수치를 차례대로 적으시오.`,
                 ];
                 qObj = { text: randPick(templates), answer1: table.data[r1][c], answer2: table.data[r2][c] };
             } else if (randType < 0.85) {
@@ -128,8 +134,8 @@ export const generateTableProblem = (isTwoTables, { plot = false, tableMin = 100
                 const short1 = tables[0].template.shortTitle;
                 const short2 = tables[1].template.shortTitle;
                 const templates = [
-                    `${tables[0].template.cols[c]} ${tables[0].template.rows[r]}의 수치를 ${short1}와 ${short2}에서 차례대로 적으시오.`,
-                    `${short1}와 ${short2}의 ${tables[0].template.cols[c]} ${tables[0].template.rows[r]} 수치를 차례대로 적으시오.`,
+                    `${tables[0].template.cols[c]} ${tables[0].template.rows[r]}의 수치를 ${joinWithAnd(short1, short2)}에서 차례대로 적으시오.`,
+                    `${joinWithAnd(short1, short2)}의 ${tables[0].template.cols[c]} ${tables[0].template.rows[r]} 수치를 차례대로 적으시오.`,
                     `${short1} ${tables[0].template.rows[r]}의 ${tables[0].template.cols[c]} 수치와 ${short2} 수치를 차례대로 적으시오.`,
                 ];
                 qObj = { text: randPick(templates), answer1: tables[0].data[r][c], answer2: tables[1].data[r][c] };
@@ -156,8 +162,8 @@ export const generateTableProblem = (isTwoTables, { plot = false, tableMin = 100
                     while (r1 === r2) r2 = Math.floor(Math.random() * table.template.rows.length);
                     key = `t${tIdx}-col-${c}-${r1}-${r2}`;
                     const templates = [
-                        `${table.template.shortTitle} ${table.template.cols[c]} ${table.template.rows[r1]}와 ${table.template.rows[r2]}의 수치를 차례대로 적으시오.`,
-                        `${table.template.shortTitle} ${table.template.rows[r1]}와 ${table.template.rows[r2]}의 ${table.template.cols[c]} 수치를 차례대로 적으시오.`,
+                        `${table.template.shortTitle} ${table.template.cols[c]} ${joinWithAnd(table.template.rows[r1], table.template.rows[r2])}의 수치를 차례대로 적으시오.`,
+                        `${table.template.shortTitle} ${joinWithAnd(table.template.rows[r1], table.template.rows[r2])}의 ${table.template.cols[c]} 수치를 차례대로 적으시오.`,
                     ];
                     qObj = { text: randPick(templates), answer1: table.data[r1][c], answer2: table.data[r2][c] };
                 }

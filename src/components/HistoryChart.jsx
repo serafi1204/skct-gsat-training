@@ -25,16 +25,19 @@ const HistoryChart = ({ history, metric = 'accuracy', showTime = true }) => {
                     {
                         label: metricLabel,
                         data: displayHistory.map((h) => h[metric] ?? null),
-                        borderColor: '#000',
-                        backgroundColor: '#000',
+                        borderColor: '#0f766e',
+                        backgroundColor: '#0f766e',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
                         yAxisID: 'y',
                         tension: 0.1,
                     },
                     ...(showTime ? [{
                         label: '평균 시간 (초)',
                         data: displayHistory.map((h) => h.averageTime),
-                        borderColor: '#888',
-                        backgroundColor: '#888',
+                        borderColor: '#8ca2a9',
+                        backgroundColor: '#8ca2a9',
                         borderDash: [5, 5],
                         yAxisID: 'y1',
                         tension: 0.1,
@@ -43,6 +46,8 @@ const HistoryChart = ({ history, metric = 'accuracy', showTime = true }) => {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#526870', usePointStyle: true } } },
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     y: {
@@ -69,7 +74,8 @@ const HistoryChart = ({ history, metric = 'accuracy', showTime = true }) => {
         };
     }, [history, metric, metricLabel, showTime]);
 
-    return <canvas ref={chartRef}></canvas>;
+    if (history.length === 0) return <p className="helper-text py-5">표시할 기록이 없습니다.</p>;
+    return <div className="h-64 w-full"><canvas ref={chartRef}></canvas></div>;
 };
 
 export default HistoryChart;

@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import PracticeHeader from './PracticeHeader';
 
 /**
  * GSAT 규칙 찾기 풀이 화면
@@ -12,6 +13,7 @@ const PatternPlaying = ({
     onSubmit,
     inputRefs,
     submitBtnRef,
+    onExit,
 }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const problemsPerPage = 5;
@@ -57,19 +59,12 @@ const PatternPlaying = ({
     };
 
     return (
-        <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto flex flex-col">
-            <div className="flex justify-between items-center mb-6 border-b border-black pb-4">
-                <h2 className="text-xl font-bold">
-                    [ 규칙 찾기 ({startIndex + 1} ~ {Math.min(startIndex + problemsPerPage, problemCount)} / {problemCount}문제) ]
-                </h2>
-                <div className="text-sm font-bold text-gray-500 hidden md:block">
-                    GSAT 추리 대비
-                </div>
-            </div>
+        <div className="practice-page"><div className="practice-container">
+            <PracticeHeader title="규칙 찾기" current={currentPage + 1} total={totalPages} caption={`문항 ${startIndex + 1}~${Math.min(startIndex + problemsPerPage, problemCount)} / ${problemCount}`} onExit={onExit} />
             
-            <div className="mb-6 bg-gray-50 border border-gray-300 p-4">
-                <div className="mb-3 font-bold text-sm text-gray-700">
-                    ※ 다음 규칙들을 참고하여 아래 문제들의 빈칸을 채우시오.
+            <div className="question-card mb-6">
+                <div className="mb-3 font-bold text-sm text-slate-600">
+                    아래 변환 예시를 참고해 문제의 빈칸을 채우세요.
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {shuffledRules.map((r, idx) => (
@@ -78,7 +73,7 @@ const PatternPlaying = ({
                                 {r.rule.input}
                             </span>
                             <span className="mx-2 text-gray-400">→</span>
-                            <span className="text-blue-600 font-bold mx-1">{r.symbol}</span>
+                            <span className="text-teal-700 font-bold mx-1">{r.symbol}</span>
                             <span className="mx-2 text-gray-400">→</span>
                             <span className="font-mono font-bold text-black text-base tracking-wider">
                                 {r.rule.output}
@@ -88,16 +83,16 @@ const PatternPlaying = ({
                 </div>
             </div>
 
-            <div className="flex flex-col gap-5">
+            <div className="question-card flex flex-col gap-5">
                 {currentProblems.map((p, i) => {
                     const idx = startIndex + i;
                     return (
                         <div
                             key={idx}
-                            className="border-b border-gray-200 pb-4 last:border-0"
+                            className="border-b border-slate-100 pb-4 last:border-0 last:pb-0"
                         >
                             <div className="flex items-center gap-2">
-                                <div className="font-bold w-10 flex-shrink-0 text-right text-sm">
+                                <div className="font-bold w-8 flex-shrink-0 text-right text-sm text-teal-700">
                                     {idx + 1}.
                                 </div>
                                 <span className="text-sm font-medium">
@@ -106,7 +101,7 @@ const PatternPlaying = ({
                                         {p.question.input}
                                     </span>
                                     <span className="mx-2 text-gray-400">→</span>
-                                    <span className="text-blue-600 font-bold mx-1">{p.symbol}</span>
+                                    <span className="text-teal-700 font-bold mx-1">{p.symbol}</span>
                                     <span className="mx-2 text-gray-400">→</span>
                                 </span>
                                 <input
@@ -115,7 +110,8 @@ const PatternPlaying = ({
                                     value={patternInputs[idx]}
                                     onChange={(e) => onPatternChange(idx, e.target.value)}
                                     onKeyDown={(e) => handleLocalKeyDown(e, idx)}
-                                    className="w-24 p-1 border border-black text-center outline-none focus:ring-1 focus:ring-black bg-blue-50 focus:bg-white uppercase font-mono font-bold text-base tracking-wider"
+                                    className="answer-input w-24 uppercase font-mono text-base tracking-wider"
+                                    aria-label={`${idx + 1}번 정답`}
                                     maxLength={4}
                                     style={{ textTransform: 'uppercase' }}
                                     autoCapitalize="characters"
@@ -128,12 +124,12 @@ const PatternPlaying = ({
                 })}
             </div>
 
-            <div className="mt-8 flex justify-end gap-4">
+            <div className="answer-actions">
                 {currentPage < totalPages - 1 ? (
                     <button
                         ref={nextBtnRef}
                         onClick={handleNextPage}
-                        className="bg-black hover:bg-gray-800 text-white font-bold py-2 px-6 transition duration-200 text-sm shadow-sm"
+                        className="primary-button"
                     >
                         다음
                     </button>
@@ -141,13 +137,13 @@ const PatternPlaying = ({
                     <button
                         ref={submitBtnRef}
                         onClick={onSubmit}
-                        className="border border-black bg-white hover:bg-black hover:text-white text-black font-bold py-2 px-6 transition duration-200 text-sm shadow-sm"
+                        className="primary-button"
                     >
                         제출
                     </button>
                 )}
             </div>
-        </div>
+        </div></div>
     );
 };
 

@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import { isSequenceAnswerCorrect } from '../utils/generateSequenceProblems';
+import PracticeHeader from './PracticeHeader';
 
-export default function SequenceTraining({ problems, onComplete, onRestart }) {
+export default function SequenceTraining({ problems, onComplete, onRestart, onExit }) {
     const promptFor = p => `${p.values.slice(0, -1).join(', ')}, ?`;
     const [index, setIndex] = useState(0);
     const [input, setInput] = useState('');
@@ -44,39 +45,36 @@ export default function SequenceTraining({ problems, onComplete, onRestart }) {
         const correctCount = results.filter(r => r.correct).length;
         const totalTime = results.reduce((sum, r) => sum + r.timeTaken, 0);
         return (
-            <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
-                <section className="bg-white border border-black p-6 text-center mb-8">
+            <div className="practice-page"><div className="practice-container">
+                <section className="result-hero">
                     <h1 className="text-xl font-bold mb-6">수열추리 연습 결과</h1>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <p>정답률<br /><strong>{Math.round(correctCount / problems.length * 100)}%</strong></p>
-                        <p>맞힌 개수<br /><strong>{correctCount} / {problems.length}</strong></p>
-                        <p>문제당 평균 시간<br /><strong>{(totalTime / problems.length).toFixed(1)}초</strong></p>
+                    <div className="metric-grid">
+                        <div className="metric-card"><span>정답률</span><strong>{Math.round(correctCount / problems.length * 100)}%</strong></div>
+                        <div className="metric-card"><span>맞힌 개수</span><strong>{correctCount} / {problems.length}</strong></div>
+                        <div className="metric-card"><span>문제당 평균 시간</span><strong>{(totalTime / problems.length).toFixed(1)}초</strong></div>
                     </div>
-                    <button onClick={onRestart} className="bg-black text-white py-2 px-8">처음으로</button>
+                    <button onClick={onRestart} className="primary-button">다른 훈련하기</button>
                 </section>
-                <h2 className="text-lg font-bold mb-4">정답 및 해설</h2>
+                <h2 className="review-heading">정답 및 해설</h2>
                 <div className="space-y-4">
                     {results.map((result, i) => (
-                        <section key={i} className="bg-white border border-black p-4">
-                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · {result.correct ? '정답' : '오답'}</h3>
+                        <section key={i} className="review-card">
+                            <h3 className="font-bold mb-3">{i + 1}. {result.problem.label} · <span className={result.correct ? 'status-good' : 'status-bad'}>{result.correct ? '정답' : '오답'}</span></h3>
                             <p className="font-mono mb-2 break-words whitespace-pre-line">{promptFor(result.problem)}</p>
                             <p className="text-sm mb-2">입력: {result.input.trim() || '(공백)'} / 정답: {result.problem.answer}</p>
                             <p className="text-sm leading-relaxed">{result.problem.explanation}</p>
                         </section>
                     ))}
                 </div>
-            </div>
+            </div></div>
         );
     }
 
     return (
-        <div className="min-h-screen p-4 md:p-8 max-w-2xl mx-auto">
-            <header className="flex justify-between items-center border-b border-black pb-4 mb-8">
-                <h1 className="text-xl font-bold">수열추리</h1>
-                <p aria-live="polite">{index + 1} / {problems.length}문제</p>
-            </header>
-            <p className="text-sm mb-6">수열의 규칙을 찾아 마지막 빈칸에 들어갈 수를 입력하세요.</p>
-            <div className="bg-white border border-black p-6 mb-8 text-xl font-mono leading-loose break-words whitespace-pre-line" aria-label="문제">
+        <div className="practice-page"><div className="practice-container">
+            <PracticeHeader title="수열추리" current={index + 1} total={problems.length} caption="숫자 규칙 연습" onExit={onExit} />
+            <p className="instruction">수열의 규칙을 찾아 마지막 빈칸에 들어갈 수를 입력하세요.</p>
+            <div className="question-card mb-6 text-2xl font-mono leading-loose break-words whitespace-pre-line" aria-label="문제">
                 {promptFor(problem)}
             </div>
             <form onSubmit={submit}>
@@ -86,12 +84,12 @@ export default function SequenceTraining({ problems, onComplete, onRestart }) {
                     autoComplete="off" spellCheck={false} value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter' && (e.repeat || e.nativeEvent.isComposing)) e.preventDefault(); }}
-                    className="border border-black w-full p-3 text-lg font-mono mb-4"
+                    className="field-input text-lg font-mono mb-4"
                 />
-                <button type="submit" className="bg-black text-white py-3 px-6 w-full hover:bg-gray-800">
+                <button type="submit" className="primary-button w-full">
                     {index + 1 === problems.length ? '제출 및 결과 보기 (Enter)' : '제출 및 다음 문제 (Enter)'}
                 </button>
             </form>
-        </div>
+        </div></div>
     );
 }

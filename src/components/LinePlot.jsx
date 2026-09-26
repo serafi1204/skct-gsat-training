@@ -3,19 +3,19 @@ import React, { useId } from 'react';
 /** Rows are series; columns are x-axis categories. No hover highlighting or hidden labels. */
 export default function LinePlot({ template, data, colors }) {
     const titleId = useId();
-    const width = 760, height = 430;
-    const left = 82, right = 42, top = 35, bottom = 48;
+    const width = 620, height = 330;
+    const left = 68, right = 34, top = 28, bottom = 40;
     const x = c => left + c * (width - left - right) / (template.cols.length - 1);
     const y = value => top + (10000 - value) * (height - top - bottom) / 10000;
     return (
-        <figure className="bg-white border border-black p-3" aria-labelledby={titleId}>
+        <figure className="question-card w-full max-w-[620px] mx-auto" aria-labelledby={titleId}>
             <figcaption id={titleId} className="text-center font-bold mb-2">{template.title}</figcaption>
             <div className="overflow-x-auto">
-                <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-w-[720px]" role="img" aria-labelledby={titleId}>
+                <svg viewBox={`0 0 ${width} ${height}`} className="w-full min-w-[540px]" role="img" aria-labelledby={titleId}>
                     {[0, 2000, 4000, 6000, 8000, 10000].map(value => (
                         <g key={value}>
                             <line x1={left} x2={width - right} y1={y(value)} y2={y(value)} stroke="#e5e5e5" />
-                            <text x={left - 32} y={y(value) + 4} textAnchor="end" fontSize="12" fill="#555">{value.toLocaleString('en-US')}</text>
+                            <text x={left - 18} y={y(value) + 4} textAnchor="end" fontSize="11" fill="#555">{value.toLocaleString('en-US')}</text>
                         </g>
                     ))}
                     {data.map((row, r) => (
@@ -24,11 +24,11 @@ export default function LinePlot({ template, data, colors }) {
                     {data.flatMap((row, r) => row.map((value, c) => (
                         <g key={`${r}-${c}`}>
                             <circle cx={x(c)} cy={y(value)} r="4" fill={colors[r]} />
-                            <text x={x(c)} y={y(value) - 10} textAnchor="middle" fontSize="13" fontWeight="600" fill="#222" stroke="white" strokeWidth="4" paintOrder="stroke" strokeLinejoin="round">{value}</text>
+                            <text x={x(c)} y={y(value) - 9} textAnchor="middle" fontSize="11" fontWeight="600" fill="#222" stroke="white" strokeWidth="3" paintOrder="stroke" strokeLinejoin="round">{value}</text>
                         </g>
                     )))}
                     {template.cols.map((label, c) => (
-                        <text key={c} x={x(c)} y={height - 18} textAnchor="middle" fontSize="13" fill="#333">{label}</text>
+                        <text key={c} x={x(c)} y={height - 16} textAnchor="middle" fontSize="12" fill="#333">{label}</text>
                     ))}
                 </svg>
             </div>

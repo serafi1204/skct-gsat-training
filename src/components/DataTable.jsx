@@ -13,17 +13,17 @@ const DataTable = ({ template, data, size = 'normal' }) => {
     const cellClass = isSmall ? 'p-1' : 'p-1 px-2';
 
     return (
-        <div className="w-full">
-            <h3 className={`font-bold ${isSmall ? 'text-sm mb-1' : 'text-base mb-2'}`}>
-                [ {template.title} ]
+        <div className="question-card w-full">
+            <h3 className={`font-bold ${isSmall ? 'text-sm mb-2' : 'text-base mb-3'}`}>
+                {template.title}
             </h3>
             <div className="overflow-x-auto">
-                <table className={`w-full border-collapse border border-black text-center whitespace-nowrap min-w-max ${textClass}`}>
-                    <thead className="bg-gray-100">
+                <table className={`w-full border-collapse border border-slate-200 text-center whitespace-nowrap min-w-max ${textClass}`}>
+                    <thead className="bg-teal-50">
                         <tr>
-                            <th className={`border border-black ${cellClass} bg-gray-50 font-bold`}>구분</th>
+                            <th className={`border border-slate-200 ${cellClass} bg-teal-50 font-bold`}>구분</th>
                             {template.cols.map((col, idx) => (
-                                <th key={idx} className={`border border-black ${cellClass} bg-gray-50 font-bold`}>
+                                <th key={idx} className={`border border-slate-200 ${cellClass} bg-teal-50 font-bold`}>
                                     {col}
                                 </th>
                             ))}
@@ -32,9 +32,9 @@ const DataTable = ({ template, data, size = 'normal' }) => {
                     <tbody>
                         {template.rows.map((row, rIdx) => (
                             <tr key={rIdx}>
-                                <td className={`border border-black bg-gray-50 font-bold ${cellClass}`}>{row}</td>
+                                <td className={`border border-slate-200 bg-slate-50 font-bold ${cellClass}`}>{row}</td>
                                 {data[rIdx].map((val, cIdx) => (
-                                    <td key={cIdx} className={`border border-black ${cellClass}`}>
+                                    <td key={cIdx} className={`border border-slate-200 ${cellClass}`}>
                                         {val.toLocaleString()}
                                     </td>
                                 ))}
