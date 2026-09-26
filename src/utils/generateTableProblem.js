@@ -5,7 +5,7 @@ import { ROW_CATEGORIES, COL_CATEGORIES } from '../data/categories.js';
  * @param {boolean} isTwoTables - 2개 표 모드 여부
  * @returns {{ isTwoTables: boolean, tables: Array, questions: Array }}
  */
-export const generateTableProblem = (isTwoTables, { plot = false } = {}) => {
+export const generateTableProblem = (isTwoTables, { plot = false, tableMin = 1000, tableMax = 9999, plotMin = 1100, plotMax = 8600 } = {}) => {
     const numTables = isTwoTables ? 2 : 1;
     const tables = [];
     const randomRowCategory = ROW_CATEGORIES[Math.floor(Math.random() * ROW_CATEGORIES.length)];
@@ -22,7 +22,25 @@ export const generateTableProblem = (isTwoTables, { plot = false } = {}) => {
         }
         return items;
     };
-    const colors = plot ? shuffle(shades.slice(0, randomRowCategory.items.length)) : undefined;
+    // Legend order and line brightness match: left is darkest, right is lightest.
+    const colors = plot ? shades.slice(0, randomRowCategory.items.length) : undefined;
+
+    const makePlotData = (rowCount, colCount) => {
+        const band = (plotMax - plotMin) / rowCount;
+        const ranks = shuffle(Array.from({ length: rowCount }, (_, index) => index));
+        return ranks.map(rank => {
+            const direction = Math.random() < 0.5 ? 1 : -1;
+            const interval = band * (0.08 + Math.random() * 0.03);
+            const startFraction = direction === 1 ? 0.2 : 0.8;
+            const values = [Math.round(plotMin + (rank + startFraction) * band)];
+            for (let column = 1; column < colCount; column++) {
+                // One trend per series; each period varies only slightly around its interval.
+                const change = Math.max(1, Math.round(interval * (0.85 + Math.random() * 0.3)));
+                values.push(values.at(-1) + direction * change);
+            }
+            return values;
+        });
+    };
 
     for (let t = 0; t < numTables; t++) {
         const baseTitle = `${randomRowCategory.title} ${randomColCategory.title}`;
@@ -33,21 +51,10 @@ export const generateTableProblem = (isTwoTables, { plot = false } = {}) => {
             rows: isTransposed ? randomColCategory.items : randomRowCategory.items,
             cols: isTransposed ? randomRowCategory.items : randomColCategory.items,
         };
-        const data = [];
-        for (let i = 0; i < template.rows.length; i++) {
-            const rowData = [];
-            for (let j = 0; j < template.cols.length; j++) {
-                rowData.push(Math.floor(Math.random() * 8999) + 1000);
-            }
-            data.push(rowData);
-        }
-        if (plot) {
-            // Separate labels vertically at each x position, while letting lines cross.
-            for (let c = 0; c < template.cols.length; c++) {
-                const ranks = shuffle(Array.from({ length: template.rows.length }, (_, i) => i));
-                ranks.forEach((rank, r) => { data[r][c] = 1100 + rank * 1200 + Math.floor(Math.random() * 301); });
-            }
-        }
+        const data = plot
+            ? makePlotData(template.rows.length, template.cols.length)
+            : template.rows.map(() => template.cols.map(() =>
+                tableMin + Math.floor(Math.random() * (tableMax - tableMin + 1))));
         tables.push({ template, data, ...(plot ? { colors } : {}) });
     }
 

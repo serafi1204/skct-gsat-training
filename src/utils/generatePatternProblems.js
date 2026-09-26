@@ -159,7 +159,7 @@ const generateSubstitutionProblem = (symbol) => {
  * @param {number} count - 문제 수
  * @returns {Array<{symbol: string, rule: {input, output}, question: {input, answer}}>}
  */
-export const generatePatternProblems = (count = 20) => {
+export const generatePatternProblems = (count = 20, { substitutionPercent = 15 } = {}) => {
     const problems = [];
     const numGroups = Math.ceil(count / 5);
 
@@ -170,7 +170,7 @@ export const generatePatternProblems = (count = 20) => {
             if (problems.length >= count) break;
             
             const symbol = groupSymbols[i];
-            if (Math.random() < 0.15) {
+            if (Math.random() * 100 < substitutionPercent) {
                 problems.push(generateSubstitutionProblem(symbol));
             } else {
                 problems.push(generateDeltaProblem(symbol));

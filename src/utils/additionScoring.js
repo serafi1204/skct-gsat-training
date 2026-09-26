@@ -7,24 +7,29 @@ export function additionErrorRate(input, answer) {
     return Number.isFinite(rate) ? rate : null;
 }
 
+export function scoreAdditionAnswer(problem, input) {
+    if (problem.scoring === 'ox') return { correct: input === problem.answer };
+    return { errorRate: additionErrorRate(input, problem.answer) };
+}
+
 export function summarizeAddition(results) {
-    const calculations = results.filter(r => r.problem?.scoring !== 'choice');
-    const comparisons = results.filter(r => r.problem?.scoring === 'choice');
-    const valid = calculations.filter(r => Number.isFinite(r.errorRate));
-    const comparisonCorrect = comparisons.filter(r => r.correct).length;
+    const sumResults = results.filter(r => r.problem.type === 'sum');
+    const validSums = sumResults.filter(r => Number.isFinite(r.errorRate));
+    const byType = ['average', 'sum', 'growth', 'share'].map(type => {
+        const items = results.filter(r => r.problem.type === type);
+        if (type === 'sum') return {
+            type, count: items.length, validCount: validSums.length,
+            averageErrorRate: validSums.length ? validSums.reduce((sum, r) => sum + r.errorRate, 0) / validSums.length : null,
+        };
+        const correctCount = items.filter(r => r.correct).length;
+        return { type, count: items.length, correctCount, accuracy: items.length ? correctCount / items.length * 100 : null };
+    });
     return {
-        averageErrorRate: valid.length ? valid.reduce((sum, r) => sum + r.errorRate / valid.length, 0) : null,
-        validCount: valid.length,
-        invalidCount: calculations.length - valid.length,
-        calculationCount: calculations.length,
-        comparisonCount: comparisons.length,
-        comparisonCorrect,
-        comparisonAccuracy: comparisons.length ? comparisonCorrect / comparisons.length * 100 : null,
-        byType: ['average', 'sum', 'share'].map(type => {
-            const items = calculations.filter(r => r.problem?.type === type);
-            const scored = items.filter(r => Number.isFinite(r.errorRate));
-            return { type, count: items.length, validCount: scored.length, averageErrorRate: scored.length ? scored.reduce((sum, r) => sum + r.errorRate / scored.length, 0) : null };
-        }),
+        byType,
+        averageErrorRate: byType.find(item => item.type === 'sum').averageErrorRate,
+        validCount: validSums.length,
+        invalidCount: sumResults.length - validSums.length,
+        calculationCount: sumResults.length,
         totalCount: results.length,
     };
 }

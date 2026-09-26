@@ -8,14 +8,15 @@ import ResultScreen from './components/ResultScreen';
 import SequenceTraining from './components/SequenceTraining';
 import { generateSequenceProblems } from './utils/generateSequenceProblems';
 import { generateAdditionProblems } from './utils/generateAdditionProblems';
+import CalculationTraining from './components/CalculationTraining';
+import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
 
 const App = () => {
     // 공통 상태
     const [gameState, setGameState] = useState('START');
-    const [examType, setExamType] = useState('TABLE'); // TABLE or PATTERN
+    const [preferences, setPreferences] = useState(loadPreferences);
+    const { examType, totalRounds, problemCount } = preferences;
     const isDataExam = examType === 'TABLE';
-    const [totalRounds, setTotalRounds] = useState(5);
-    const [problemCount, setProblemCount] = useState(20);
     const [currentRound, setCurrentRound] = useState(0);
     const [problemSequence, setProblemSequence] = useState([]);
     const [tableProblem, setTableProblem] = useState(null);
@@ -35,13 +36,35 @@ const App = () => {
 
     // localStorage 로 히스토리 로드
     useEffect(() => {
-        const saved = JSON.parse(localStorage.getItem('skctHistory') || '[]');
-        setHistory(saved);
+        try {
+            const saved = JSON.parse(localStorage.getItem('skctHistory') || '[]');
+            if (Array.isArray(saved) && saved.length) {
+                setHistory(saved);
+                savePlotHistory(saved);
+            } else {
+                setHistory(loadPlotHistory());
+            }
+        } catch {
+            setHistory(loadPlotHistory());
+        }
     }, []);
+
+    useEffect(() => { savePreferences(preferences); }, [preferences]);
+
+    const updatePreference = (key, value) => setPreferences(previous => normalizePreferences({ ...previous, [key]: value }));
+
+    const saveRecord = record => {
+        const updated = [...history, record];
+        localStorage.setItem('skctHistory', JSON.stringify(updated));
+        savePlotHistory(updated);
+        setHistory(updated);
+    };
 
     const handleStart = () => {
         if (examType === 'SEQUENCE' || examType === 'ADDITION') {
-            setSequenceProblems(examType === 'ADDITION' ? generateAdditionProblems(problemCount) : generateSequenceProblems(problemCount));
+            setSequenceProblems(examType === 'ADDITION'
+                ? generateAdditionProblems(problemCount, { min: preferences.calculationMin, max: preferences.calculationMax })
+                : generateSequenceProblems(problemCount, { maxValue: preferences.sequenceMax }));
             setGameState('PLAYING');
         } else if (isDataExam) {
             const numTwoTables = Math.floor(totalRounds / 2);
@@ -55,12 +78,12 @@ const App = () => {
             setProblemSequence(seq);
             setResults([]);
             setCurrentRound(0);
-            setTableProblem(generateTableProblem(seq[0], { plot: Math.random() < 0.5 }));
+            setTableProblem(generateTableProblem(seq[0], { plot: Math.random() * 100 < preferences.tablePlotPercent, ...preferences }));
             setUserInputs(Array(8).fill(''));
             setRoundStartTime(Date.now());
             setGameState('PLAYING');
         } else if (examType === 'PATTERN') {
-            setPatternProblems(generatePatternProblems(problemCount));
+            setPatternProblems(generatePatternProblems(problemCount, { substitutionPercent: preferences.patternSubstitutionPercent }));
             setPatternInputs(Array(problemCount).fill(''));
             setResults([]);
             setCurrentRound(0);
@@ -123,7 +146,7 @@ const App = () => {
             } else {
                 const next = currentRound + 1;
                 setCurrentRound(next);
-                setTableProblem(generateTableProblem(problemSequence[next], { plot: Math.random() < 0.5 }));
+                setTableProblem(generateTableProblem(problemSequence[next], { plot: Math.random() * 100 < preferences.tablePlotPercent, ...preferences }));
                 setUserInputs(Array(8).fill(''));
                 setRoundStartTime(Date.now());
                 setTimeout(() => inputRefs.current[0]?.focus(), 50);
@@ -183,10 +206,7 @@ const App = () => {
             averageTime: avgTime,
             examType: examType,
         };
-        const existing = JSON.parse(localStorage.getItem('skctHistory') || '[]');
-        const updated = [...existing, newRecord];
-        localStorage.setItem('skctHistory', JSON.stringify(updated));
-        setHistory(updated);
+        saveRecord(newRecord);
         setGameState('RESULT');
     };
 
@@ -194,17 +214,14 @@ const App = () => {
     if (gameState === 'START') {
         return (
             <StartScreen
-                examType={examType}
-                setExamType={setExamType}
-                totalRounds={totalRounds}
-                setTotalRounds={setTotalRounds}
-                problemCount={problemCount}
-                setProblemCount={setProblemCount}
+                preferences={preferences}
+                onPreferenceChange={updatePreference}
                 onStart={handleStart}
                 history={history}
                 onClearHistory={() => {
                     if (window.confirm('모든 훈련 기록을 초기화할까요? 삭제한 기록은 복구할 수 없습니다.')) {
                         localStorage.removeItem('skctHistory');
+                        clearPlotHistory();
                         setHistory([]);
                     }
                 }}
@@ -213,18 +230,17 @@ const App = () => {
     }
 
     if (gameState === 'PLAYING') {
-        if (examType === 'SEQUENCE' || examType === 'ADDITION') {
+        if (examType === 'ADDITION') {
+            return <CalculationTraining
+                problems={sequenceProblems}
+                onComplete={saveRecord}
+                onRestart={() => setGameState('START')}
+            />;
+        } else if (examType === 'SEQUENCE') {
             return (
                 <SequenceTraining
-                    examType={examType}
-                    title={examType === 'ADDITION' ? '계산 훈련' : undefined}
                     problems={sequenceProblems}
-                    onComplete={(record) => {
-                        const existing = JSON.parse(localStorage.getItem('skctHistory') || '[]');
-                        const updated = [...existing, record];
-                        localStorage.setItem('skctHistory', JSON.stringify(updated));
-                        setHistory(updated);
-                    }}
+                    onComplete={saveRecord}
                     onRestart={() => setGameState('START')}
                 />
             );

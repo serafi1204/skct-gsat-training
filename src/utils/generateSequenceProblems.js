@@ -98,8 +98,8 @@ function candidate(type) {
 }
 
 // Reject collapsed sequences and common simple rules with competing answers.
-function isValid(values) {
-    if (!values.every(v => Number.isInteger(v) && v >= 1 && v <= 999)) return false;
+function isValid(values, maxValue = 999) {
+    if (!values.every(v => Number.isInteger(v) && v >= 1 && v <= maxValue)) return false;
     if (new Set(values).size < 3) return false;
     const shown = values.slice(0, -1), answer = values.at(-1);
     const d = shown[1] - shown[0], r = shown[1] / shown[0];
@@ -108,7 +108,7 @@ function isValid(values) {
     return true;
 }
 
-export function generateSequenceProblems(count) {
+export function generateSequenceProblems(count, { maxValue = 999 } = {}) {
     if (!Number.isInteger(count) || count < 1 || count > 100) throw new RangeError('문제 수는 1~100이어야 합니다.');
     const seen = new Set();
     return Array.from({ length: count }, () => {
@@ -116,7 +116,7 @@ export function generateSequenceProblems(count) {
         const type = pick(SEQUENCE_TYPES);
         for (let attempt = 0; attempt < 10000; attempt++) {
             const problem = candidate(type.id);
-            if (!problem || !isValid(problem.values)) continue;
+            if (!problem || !isValid(problem.values, maxValue)) continue;
             const key = problem.values.slice(0, -1).join(',');
             if (seen.has(key)) continue;
             seen.add(key);
