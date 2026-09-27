@@ -39,7 +39,15 @@ input[type='number'] { -moz-appearance: textfield; }
 .todo-heading-row h1 { margin: 0; font-size: 18px; line-height: 1.4; font-weight: 800; letter-spacing: -.035em; }
 .todo-heading-row h1 span { margin-left: 4px; color: #829198; font-size: 12px; font-weight: 600; letter-spacing: 0; }
 .todo-total { color: #0f766e; font-size: 12px; font-weight: 800; white-space: nowrap; }
-.todo-progress { height: 4px; margin-bottom: 10px; }
+.progress-track.todo-progress { height: 4px; margin-bottom: 10px; }
+.todo-progress.complete { animation: todo-complete-glow 1s ease-out; }
+.todo-progress.complete > span { position: relative; background: #0aa786; }
+.todo-progress.complete > span::after { content: ''; position: absolute; top: 0; left: -40%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .9), transparent); animation: todo-complete-shine .9s ease-out .2s both; }
+@keyframes todo-complete-glow { 40% { box-shadow: 0 0 0 4px rgba(10, 167, 134, .16), 0 0 14px rgba(10, 167, 134, .45); } }
+@keyframes todo-complete-shine { to { transform: translateX(350%); } }
+@media (prefers-reduced-motion: reduce) {
+    .todo-progress.complete, .todo-progress.complete > span::after { animation: none; }
+}
 .todo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
 .todo-item { display: grid; grid-template-columns: 90px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 0; min-height: 40px; border-top: 1px solid #edf1f1; }
 .todo-item-name { font-size: 13px; white-space: nowrap; }
