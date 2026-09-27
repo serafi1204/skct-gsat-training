@@ -9,6 +9,11 @@ export const initialCalculator = Object.freeze({
 
 const symbols = { '+': '+', '-': '−', '*': '×', '/': '÷' };
 
+export function calculatorExpression(state) {
+    if (!state.operator || state.accumulator == null) return '';
+    return `${state.accumulator} ${symbols[state.operator]}${state.waiting ? '' : ` ${state.display}`}`;
+}
+
 function formatNumber(value) {
     if (!Number.isFinite(value)) return '오류';
     return String(Number(value.toPrecision(12)));

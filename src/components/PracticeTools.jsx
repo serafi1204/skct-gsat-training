@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
+import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
 
 const calculatorKeys = [
     ['C', 'C'], ['⌫', 'Backspace'], ['÷', '/'], ['×', '*'],
@@ -12,7 +12,6 @@ const calculatorKeys = [
 function ScratchPad() {
     const [mode, setMode] = useState('memo');
     const [memo, setMemo] = useState('');
-    const [eraser, setEraser] = useState(false);
     const canvasRef = useRef(null);
     const drawing = useRef(false);
     const previous = useRef(null);
@@ -34,10 +33,9 @@ function ScratchPad() {
         previous.current = point(event);
         const context = canvas.getContext('2d');
         context.save();
-        context.globalCompositeOperation = eraser ? 'destination-out' : 'source-over';
         context.fillStyle = '#172b38';
         context.beginPath();
-        context.arc(previous.current.x, previous.current.y, eraser ? 11 : 2, 0, Math.PI * 2);
+        context.arc(previous.current.x, previous.current.y, 2, 0, Math.PI * 2);
         context.fill();
         context.restore();
     };
@@ -48,11 +46,10 @@ function ScratchPad() {
         const next = point(event);
         const context = canvas.getContext('2d');
         context.save();
-        context.globalCompositeOperation = eraser ? 'destination-out' : 'source-over';
         context.lineCap = 'round';
         context.lineJoin = 'round';
         context.strokeStyle = '#172b38';
-        context.lineWidth = eraser ? 22 : 4;
+        context.lineWidth = 4;
         context.beginPath();
         context.moveTo(previous.current.x, previous.current.y);
         context.lineTo(next.x, next.y);
@@ -78,14 +75,12 @@ function ScratchPad() {
                 <button type="button" role="tab" aria-selected={mode === 'paint'} onClick={() => setMode('paint')}>그림판</button>
             </div>
             {mode === 'paint' && <div className="tool-actions">
-                <button type="button" aria-pressed={!eraser} onClick={() => setEraser(false)}>펜</button>
-                <button type="button" aria-pressed={eraser} onClick={() => setEraser(true)}>지우개</button>
                 <button type="button" onClick={clearCanvas}>초기화</button>
             </div>}
         </div>
         <div className="tool-pad-content">
             <textarea aria-label="메모장" className="tool-memo" value={memo} onChange={event => setMemo(event.target.value)} hidden={mode !== 'memo'} spellCheck={false} />
-            <canvas ref={canvasRef} width={800} height={680} aria-label="그림판" className="tool-canvas" hidden={mode !== 'paint'}
+            <canvas ref={canvasRef} width={600} height={496} aria-label="그림판" className="tool-canvas" hidden={mode !== 'paint'}
                 onPointerDown={startDrawing} onPointerMove={draw} onPointerUp={stopDrawing} onPointerCancel={stopDrawing} />
         </div>
     </section>;
@@ -112,6 +107,7 @@ function Calculator({ active }) {
         <div className="tool-header"><h2>계산기</h2></div>
         <div className="calculator-display" aria-live="polite">
             <div className="calculator-previous">{state.previousResult || '\u00a0'}</div>
+            <div className="calculator-expression">{calculatorExpression(state) || '\u00a0'}</div>
             <div className="calculator-current">{state.display}</div>
         </div>
         <div className="calculator-keys">
