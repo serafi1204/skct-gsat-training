@@ -11,6 +11,7 @@ export const DEFAULT_PREFERENCES = Object.freeze({
     sequenceMax: 999,
     calculationMin: 100,
     calculationMax: 9999,
+    calculatorUsed: false,
 });
 
 const limits = {
@@ -26,6 +27,7 @@ export function normalizePreferences(value = {}) {
     if (['TABLE', 'PATTERN', 'SEQUENCE', 'ADDITION'].includes(source.examType)) next.examType = source.examType;
     if ([5, 10, 20, 30].includes(Number(source.totalRounds))) next.totalRounds = Number(source.totalRounds);
     if ([5, 10, 20, 30].includes(Number(source.problemCount))) next.problemCount = Number(source.problemCount);
+    if (typeof source.calculatorUsed === 'boolean') next.calculatorUsed = source.calculatorUsed;
     for (const [key, [min, max]] of Object.entries(limits)) {
         const number = Number(source[key]);
         if (source[key] !== undefined && Number.isFinite(number)) next[key] = Math.round(Math.min(max, Math.max(min, number)));
@@ -70,10 +72,14 @@ const chartRecord = record => [
         const item = record.byType?.find(entry => entry.type === type);
         return item ? [item.accuracy ?? null, item.averageErrorRate ?? null] : null;
     }),
+    record.dateKey ?? null,
+    record.calculatorUsed ?? null,
 ];
 
 const expandChartRecord = item => ({
     examType: item[0], accuracy: item[1], averageTime: item[2],
+    dateKey: item[4] ?? null,
+    calculatorUsed: item[5] === true ? true : item[5] === false ? false : null,
     byType: Array.isArray(item[3]) ? ['average', 'sum', 'growth', 'share'].map((type, index) => ({
         type, accuracy: item[3][index]?.[0] ?? null, averageErrorRate: item[3][index]?.[1] ?? null,
     })) : undefined,
