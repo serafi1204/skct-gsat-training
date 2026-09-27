@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import HistoryChart from './HistoryChart';
 import CalculationHistory from './CalculationHistory';
 import DailyTodo from './DailyTodo';
+import PracticeTools from './PracticeTools';
 import { aggregateDailyHistory } from '../utils/dailyHistory.js';
 
 const modes = [
@@ -32,6 +33,7 @@ const modeHistory = (history, mode) => history.filter(record => mode === 'TABLE'
     : record.examType === mode);
 
 export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory }) {
+    const [activeTab, setActiveTab] = useState('training');
     const { examType, totalRounds, problemCount } = preferences;
     const selectedMode = modes.find(mode => mode.id === examType);
     const selectedHistory = modeHistory(history, examType);
@@ -45,10 +47,14 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
             <header className="site-header">
                 <div className="site-header-inner">
                     <div className="brand-lockup"><span className="brand-mark">S</span><span>SKCT 연습실</span></div>
+                    <nav className="main-tabs" role="tablist" aria-label="메인 화면">
+                        <button type="button" role="tab" id="training-tab" aria-controls="training-panel" aria-selected={activeTab === 'training'} onClick={() => setActiveTab('training')}>훈련</button>
+                        <button type="button" role="tab" id="tools-tab" aria-controls="tools-panel" aria-selected={activeTab === 'tools'} onClick={() => setActiveTab('tools')}>풀이 도구</button>
+                    </nav>
                 </div>
             </header>
 
-            <main className="dashboard-layout">
+            <main className="dashboard-layout" id="training-panel" role="tabpanel" aria-labelledby="training-tab" hidden={activeTab !== 'training'}>
                 <aside className="dashboard-sidebar" aria-label="오늘의 Todo와 훈련 선택">
                     <DailyTodo modes={modes} />
                     <section className="mode-section" aria-labelledby="mode-heading">
@@ -104,6 +110,9 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                         </>}
                     </section>
                 </div>
+            </main>
+            <main className="tools-main" id="tools-panel" role="tabpanel" aria-labelledby="tools-tab" hidden={activeTab !== 'tools'}>
+                <PracticeTools active={activeTab === 'tools'} />
             </main>
         </div>
     );

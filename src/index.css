@@ -10,6 +10,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { margin: 0; min-width: 320px; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
@@ -23,6 +24,34 @@ input[type='number'] { -moz-appearance: textfield; }
 .site-header-inner { max-width: 1080px; min-height: 72px; margin: auto; padding: 0 28px; display: flex; justify-content: space-between; align-items: center; gap: 24px; }
 .brand-lockup { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 800; letter-spacing: -.035em; white-space: nowrap; }
 .brand-mark { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; color: #fff; background: #0f766e; font-size: 19px; font-weight: 700; }
+.main-tabs { display: flex; align-self: stretch; align-items: stretch; gap: 8px; }
+.main-tabs button { min-width: 90px; padding: 0 14px; border: 0; border-bottom: 3px solid transparent; background: transparent; color: #62777e; font-weight: 700; }
+.main-tabs button[aria-selected='true'] { border-bottom-color: #0f766e; color: #0b665f; }
+.tools-main { padding: 28px 16px 64px; }
+.tools-page { display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.tool-pad, .tool-calculator { width: min(400px, 100%); display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
+.tool-pad { height: 400px; }
+.tool-calculator { height: 500px; padding: 0 16px 16px; }
+.tool-header { flex: 0 0 52px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 12px; border-bottom: 1px solid #e4ecea; }
+.tool-calculator .tool-header { padding: 0; }
+.tool-header h2 { margin: 0; font-size: 17px; font-weight: 800; }
+.tool-switch, .tool-actions { display: flex; align-items: center; gap: 3px; }
+.tool-switch button, .tool-actions button { padding: 6px 7px; border: 0; border-radius: 6px; background: transparent; color: #526770; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.tool-switch button[aria-selected='true'], .tool-actions button[aria-pressed='true'] { background: #eaf6f2; color: #0b665f; }
+.tool-actions button:last-child { color: #a05250; }
+.tool-pad-content { flex: 1; min-height: 0; background: #fff; }
+.tool-memo, .tool-canvas { width: 100%; height: 100%; }
+.tool-memo { display: block; padding: 14px; border: 0; outline: none; resize: none; background: transparent; color: #172b38; font-size: 15px; line-height: 1.55; }
+.tool-canvas { display: block; touch-action: none; cursor: crosshair; }
+.calculator-display { flex: 0 0 94px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 0; padding: 4px 8px 10px; text-align: right; }
+.calculator-previous { max-width: 100%; overflow: hidden; color: #71828a; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.calculator-current { max-width: 100%; overflow: hidden; font-size: 34px; font-weight: 800; font-variant-numeric: tabular-nums; text-overflow: ellipsis; white-space: nowrap; }
+.calculator-keys { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(5, 1fr); gap: 8px; }
+.calculator-keys button { min-width: 0; border: 1px solid #d6e2e0; border-radius: 9px; background: #f7faf9; color: #172b38; font-size: 20px; font-weight: 700; }
+.calculator-keys button:hover { background: #eaf6f2; }
+.calculator-keys button.operator { color: #0b665f; background: #eaf6f2; }
+.calculator-keys button.equals { grid-row: span 2; color: #fff; background: #0f766e; }
+.calculator-keys button.zero { grid-column: span 2; }
 .dashboard-layout { width: min(100% - 40px, 1200px); margin: 0 auto; padding: 28px 0 64px; display: grid; grid-template-columns: 310px minmax(0, 1fr); align-items: start; gap: 24px; }
 .dashboard-sidebar, .dashboard-main { display: grid; align-content: start; gap: 18px; min-width: 0; }
 .eyebrow { display: inline-block; margin-bottom: 9px; color: #0b766b; font-size: 12px; font-weight: 800; letter-spacing: .09em; }
@@ -152,6 +181,7 @@ input[type='number'] { -moz-appearance: textfield; }
 @media (max-width: 520px) {
     .site-header-inner { min-height: 60px; padding: 0 16px; }
     .brand-lockup { font-size: 14px; }
+    .main-tabs button { min-width: 68px; padding: 0 6px; font-size: 13px; }
     .dashboard-layout { width: min(100% - 28px, 1200px); padding-top: 24px; gap: 20px; }
     .dashboard-sidebar { grid-template-columns: 1fr; }
     .todo-panel { padding: 14px 16px 10px; }
