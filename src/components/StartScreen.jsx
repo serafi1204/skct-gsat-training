@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import HistoryChart from './HistoryChart';
 import CalculationHistory from './CalculationHistory';
+import DailyTodo from './DailyTodo';
 
 const modes = [
     { id: 'TABLE', name: '자료 읽기', subtitle: '표 · 선 그래프', description: '항목과 수치를 빠르게 찾아 정확히 입력합니다.', icon: '▤' },
@@ -54,11 +55,7 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
 
             <main className="home-container">
                 {view === 'practice' ? <>
-                    <div className="home-intro">
-                        <span className="eyebrow">짧게, 꾸준히, 정확하게</span>
-                        <h1>오늘 연습할 유형을 고르세요</h1>
-                        <p>반복 훈련에 집중할 수 있도록 문제 수를 정하고 바로 시작하세요.</p>
-                    </div>
+                    <DailyTodo modes={modes} />
                     <section aria-labelledby="mode-heading">
                         <div className="section-heading"><h2 id="mode-heading">훈련 유형</h2><span>4가지 유형</span></div>
                         <div className="mode-grid">
