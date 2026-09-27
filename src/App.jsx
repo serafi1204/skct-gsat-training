@@ -10,6 +10,7 @@ import { generateSequenceProblems } from './utils/generateSequenceProblems';
 import { generateAdditionProblems } from './utils/generateAdditionProblems';
 import CalculationTraining from './components/CalculationTraining';
 import ConfirmDialog from './components/ConfirmDialog';
+import { PracticeToolStack } from './components/PracticeTools';
 import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
 import { localDateKey } from './utils/dailyTodo.js';
 import { DAILY_HISTORY_VERSION_KEY, prepareDailyHistory } from './utils/dailyHistory.js';
@@ -294,7 +295,12 @@ const App = () => {
     }
 
     return <>
-        {screen}
+        {gameState === 'PLAYING' ? <div className="playing-layout">
+            <div className="playing-main">{screen}</div>
+            <aside className="playing-tools" aria-label="훈련 풀이 도구">
+                <PracticeToolStack active />
+            </aside>
+        </div> : screen}
         {pendingAction && <ConfirmDialog
             title={pendingAction === 'exit' ? '훈련을 그만둘까요?' : '모든 기록을 초기화할까요?'}
             description={pendingAction === 'exit' ? '진행 중인 답안은 저장되지 않습니다.' : '저장된 훈련 기록과 결과 그래프가 삭제됩니다. 이 작업은 되돌릴 수 없습니다.'}
