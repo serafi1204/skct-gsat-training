@@ -108,7 +108,7 @@ function Calculator({ active }) {
         <div className="calculator-display" aria-live="polite">
             <div className="calculator-previous">{state.previousResult || '\u00a0'}</div>
             <div className="calculator-expression">{calculatorExpression(state) || '\u00a0'}</div>
-            <div className="calculator-current">{state.display}</div>
+            <div className="calculator-current">{state.evaluated ? `ANS=${state.display}` : state.display}</div>
         </div>
         <div className="calculator-keys">
             {calculatorKeys.map(([label, key]) => <button key={key} type="button" onClick={event => { input(key); event.currentTarget.blur(); }}
@@ -118,9 +118,43 @@ function Calculator({ active }) {
     </section>;
 }
 
+function AnswerSheet() {
+    const [answers, setAnswers] = useState(() => Array(100).fill(null));
+    const markedCount = answers.filter(Boolean).length;
+
+    const selectAnswer = (question, choice) => {
+        setAnswers(current => current.map((answer, index) => index === question ? (answer === choice ? null : choice) : answer));
+    };
+
+    return <section className="surface tool-answer-sheet" aria-label="OMR 답안지">
+        <div className="tool-header"><h2>OMR 답안지</h2><span className="omr-count">{markedCount}/100</span></div>
+        <div className="omr-scroll">
+            {Array.from({ length: 5 }, (_, group) => <div className="omr-group" key={group}>
+                <div className="omr-group-label">{group * 20 + 1}–{group * 20 + 20}</div>
+                {Array.from({ length: 20 }, (_, offset) => {
+                    const question = group * 20 + offset;
+                    return <div className="omr-row" key={question}>
+                        <span className="omr-number">{question + 1}</span>
+                        <div className="omr-choices" role="group" aria-label={`${question + 1}번 답안`}>
+                            {[1, 2, 3, 4, 5].map(choice => <button key={choice} type="button"
+                                className={answers[question] === choice ? 'selected' : ''}
+                                aria-label={`${question + 1}번 ${choice}번 선택`}
+                                aria-pressed={answers[question] === choice}
+                                onClick={() => selectAnswer(question, choice)}>{choice}</button>)}
+                        </div>
+                    </div>;
+                })}
+            </div>)}
+        </div>
+    </section>;
+}
+
 export default function PracticeTools({ active }) {
     return <div className="tools-page">
-        <ScratchPad />
-        <Calculator active={active} />
+        <div className="tools-stack">
+            <ScratchPad />
+            <Calculator active={active} />
+        </div>
+        <AnswerSheet />
     </div>;
 }
