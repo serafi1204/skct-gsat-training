@@ -15,9 +15,10 @@ export function normalizeDailyTodo(value, date = localDateKey()) {
     const counts = {};
     const checked = {};
     for (const mode of TODO_MODES) {
-        const candidate = Number(source.counts?.[mode]);
+        const rawCount = source.counts?.[mode];
+        const candidate = rawCount == null ? NaN : Number(rawCount);
         counts[mode] = Number.isInteger(candidate)
-            ? Math.min(MAX_TODO_COUNT, Math.max(1, candidate))
+            ? Math.min(MAX_TODO_COUNT, Math.max(0, candidate))
             : DEFAULT_TODO_COUNT;
         checked[mode] = Array.from({ length: counts[mode] }, (_, index) =>
             sameDay && source.checked?.[mode]?.[index] === true);
@@ -37,7 +38,7 @@ export function saveDailyTodo(todo, storage = localStorage) {
 export function resizeDailyTodo(todo, mode, count, date = localDateKey()) {
     const current = normalizeDailyTodo(todo, date);
     if (!TODO_MODES.includes(mode)) return current;
-    const nextCount = Math.min(MAX_TODO_COUNT, Math.max(1, Math.trunc(count)));
+    const nextCount = Math.min(MAX_TODO_COUNT, Math.max(0, Math.trunc(count)));
     return normalizeDailyTodo({
         ...current,
         counts: { ...current.counts, [mode]: nextCount },

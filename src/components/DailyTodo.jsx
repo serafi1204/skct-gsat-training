@@ -34,6 +34,9 @@ export default function DailyTodo({ modes }) {
             <h1 id="todo-heading">오늘의 Todo <span>{Number(month)}/{Number(day)}</span></h1>
             <span className="todo-total" aria-live="polite">{done} / {total} 완료</span>
         </div>
+        <div className="progress-track todo-progress" role="progressbar" aria-label="오늘의 훈련 완료" aria-valuenow={done} aria-valuemin={0} aria-valuemax={Math.max(total, 1)} aria-valuetext={total ? `${done}/${total} 완료` : '설정한 체크 항목 없음'}>
+            <span style={{ width: `${total ? done / total * 100 : 0}%` }} />
+        </div>
         <div className="todo-grid">
             {modes.map(mode => {
                 const count = todo.counts[mode.id];
@@ -46,7 +49,7 @@ export default function DailyTodo({ modes }) {
                         </label>)}
                     </div>
                     <div className="todo-adjust" role="group" aria-label={`${mode.name} 체크 칸 수`}>
-                        <button type="button" aria-label={`${mode.name} 체크 칸 줄이기`} disabled={count <= 1}
+                        <button type="button" aria-label={`${mode.name} 체크 칸 줄이기`} disabled={count <= 0}
                             onClick={() => setTodo(previous => resizeDailyTodo(previous, mode.id, previous.counts[mode.id] - 1))}>−</button>
                         <span>{count}</span>
                         <button type="button" aria-label={`${mode.name} 체크 칸 늘리기`} disabled={count >= MAX_TODO_COUNT}

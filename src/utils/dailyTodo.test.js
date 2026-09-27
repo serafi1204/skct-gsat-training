@@ -38,3 +38,17 @@ test('resizing trims removed checkboxes and keeps other training untouched', () 
     assert.deepEqual(todo.checked.PATTERN, [true, false, false]);
     assert.equal(localDateKey(new Date(2026, 8, 27, 23, 59)), '2026-09-27');
 });
+
+test('zero checkboxes persist and all-zero progress stays empty', () => {
+    const memory = new Map();
+    const storage = { getItem: key => memory.get(key) ?? null, setItem: (key, value) => memory.set(key, value) };
+    let todo = normalizeDailyTodo(null, '2026-09-27');
+    for (const mode of TODO_MODES) todo = resizeDailyTodo(todo, mode, 0, '2026-09-27');
+    assert.deepEqual(dailyTodoProgress(todo), { done: 0, total: 0 });
+    for (const mode of TODO_MODES) assert.deepEqual(todo.checked[mode], []);
+    saveDailyTodo(todo, storage);
+    const tomorrow = loadDailyTodo(storage, '2026-09-28');
+    for (const mode of TODO_MODES) assert.equal(tomorrow.counts[mode], 0);
+    assert.deepEqual(dailyTodoProgress(tomorrow), { done: 0, total: 0 });
+    assert.equal(normalizeDailyTodo({ counts: { TABLE: null } }, '2026-09-27').counts.TABLE, DEFAULT_TODO_COUNT);
+});
