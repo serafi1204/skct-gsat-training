@@ -70,6 +70,7 @@ input[type='number'] { -moz-appearance: textfield; }
 .omr-choices button.selected { border-color: #0f766e; background: #0f766e; color: #fff; }
 .omr-choices button.selected.correct { border-color: #d7a616; background: #f5ce4e; color: #3d3108; }
 .omr-choices button.selected.incorrect { border-color: #b8403b; background: #d5534c; color: #fff; }
+.omr-choices button.answer-key { border-color: #d7a616; background: #f5ce4e; color: #3d3108; }
 .omr-text-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 524px; padding: 14px; border-radius: 12px; }
 .omr-text-panel label { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: #244a50; font-size: 13px; font-weight: 800; }
 .omr-text-panel small { color: #71828a; font-size: 11px; font-weight: 500; }

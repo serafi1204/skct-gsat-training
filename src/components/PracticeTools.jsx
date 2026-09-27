@@ -149,11 +149,15 @@ function AnswerSheet({ answers, correctAnswers, onSelectAnswer }) {
                 return <div className={`omr-row ${Math.floor(question / 5) % 2 === 1 ? 'shaded' : ''}`} key={question}>
                     <span className="omr-number">{question + 1}</span>
                     <div className="omr-choices" role="group" aria-label={`${question + 1}번 답안`}>
-                        {[1, 2, 3, 4, 5].map(choice => <button key={choice} type="button"
-                            className={answers[question] === choice ? `selected ${result}` : ''}
-                            aria-label={`${question + 1}번 ${choice}번 선택${answers[question] === choice && result ? `, ${result === 'correct' ? '정답' : '오답'}` : ''}`}
-                            aria-pressed={answers[question] === choice}
-                            onClick={() => onSelectAnswer(question, choice)}>{choice}</button>)}
+                        {[1, 2, 3, 4, 5].map(choice => {
+                            const selected = answers[question] === choice;
+                            const answerKey = result === 'incorrect' && correctAnswers[question] === choice;
+                            return <button key={choice} type="button"
+                                className={[selected && 'selected', selected && result, answerKey && 'answer-key'].filter(Boolean).join(' ')}
+                                aria-label={`${question + 1}번 ${choice}번 선택${answerKey ? ', 실제 정답' : selected && result ? `, ${result === 'correct' ? '정답' : '오답'}` : ''}`}
+                                aria-pressed={selected}
+                                onClick={() => onSelectAnswer(question, choice)}>{choice}</button>;
+                        })}
                     </div>
                 </div>;
             })}
