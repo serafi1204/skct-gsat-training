@@ -11,6 +11,8 @@ import { generateAdditionProblems } from './utils/generateAdditionProblems';
 import CalculationTraining from './components/CalculationTraining';
 import ConfirmDialog from './components/ConfirmDialog';
 import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
+import { localDateKey } from './utils/dailyTodo.js';
+import { DAILY_HISTORY_VERSION_KEY, prepareDailyHistory } from './utils/dailyHistory.js';
 
 const App = () => {
     // 공통 상태
@@ -36,18 +38,21 @@ const App = () => {
     const inputRefs = useRef([]);
     const submitBtnRef = useRef(null);
 
-    // localStorage 로 히스토리 로드
+    // 기존 회차별 기록은 한 번만 오늘 날짜로 묶는다.
     useEffect(() => {
         try {
             const saved = JSON.parse(localStorage.getItem('skctHistory') || '[]');
-            if (Array.isArray(saved) && saved.length) {
-                setHistory(saved);
-                savePlotHistory(saved);
-            } else {
-                setHistory(loadPlotHistory());
+            const source = Array.isArray(saved) && saved.length ? saved : loadPlotHistory();
+            const migrateExisting = localStorage.getItem(DAILY_HISTORY_VERSION_KEY) !== '1';
+            const prepared = prepareDailyHistory(source, localDateKey(), migrateExisting);
+            setHistory(prepared);
+            if (migrateExisting || !Array.isArray(saved) || !saved.length || source.some(record => !record.dateKey)) {
+                localStorage.setItem('skctHistory', JSON.stringify(prepared));
             }
+            localStorage.setItem(DAILY_HISTORY_VERSION_KEY, '1');
+            if (prepared.length) savePlotHistory(prepared);
         } catch {
-            setHistory(loadPlotHistory());
+            setHistory(prepareDailyHistory(loadPlotHistory()));
         }
     }, []);
 
@@ -56,7 +61,7 @@ const App = () => {
     const updatePreference = (key, value) => setPreferences(previous => normalizePreferences({ ...previous, [key]: value }));
 
     const saveRecord = record => {
-        const updated = [...history, record];
+        const updated = [...history, { ...record, dateKey: localDateKey() }];
         localStorage.setItem('skctHistory', JSON.stringify(updated));
         savePlotHistory(updated);
         setHistory(updated);
@@ -238,6 +243,7 @@ const App = () => {
         if (examType === 'ADDITION') {
             screen = <CalculationTraining
                 problems={sequenceProblems}
+                calculatorUsed={preferences.calculatorUsed}
                 onComplete={saveRecord}
                 onRestart={() => setGameState('START')}
                 onExit={handleExit}

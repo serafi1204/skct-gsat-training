@@ -8,20 +8,27 @@ const accuracySeries = [
     { key: 'growthAccuracy', label: '증가율 비교', color: '#526db3' },
     { key: 'shareAccuracy', label: '전체 대비 비율', color: '#a45d9f' },
 ];
+const timeSeries = [
+    { key: 'withoutCalculatorTime', label: '계산기 미사용', color: '#0f766e' },
+    { key: 'calculatorTime', label: '계산기 사용', color: '#dc7a39' },
+];
+const legacyTimeSeries = { key: 'unclassifiedTime', label: '기존 기록 (구분 없음)', color: '#8ca2a9' };
 
 export default function CalculationHistory({ history }) {
     const recent = history.slice(-20);
+    const visibleTimeSeries = recent.some(record => record.unclassifiedTime !== null && record.unclassifiedTime !== undefined)
+        ? [...timeSeries, legacyTimeSeries] : timeSeries;
     return (
-        <div className="space-y-6">
+        <div className="calculation-history-grid">
             <section>
                 <h4 className="text-sm font-semibold mb-2">유형별 정답률</h4>
-                <HistoryChart history={calculationAccuracyHistory(recent)} series={accuracySeries} showTime={false} />
+                <HistoryChart history={calculationAccuracyHistory(recent)} series={accuracySeries} showTime={false} compact />
             </section>
             <section>
-                <h4 className="text-sm font-semibold mb-2">통합 소요 시간 — 전체 문항 평균</h4>
-                <HistoryChart history={recent} metric="averageTime" showTime={false} />
+                <h4 className="text-sm font-semibold mb-2">소요 시간 — 계산기 사용 여부</h4>
+                <HistoryChart history={recent} series={visibleTimeSeries} seriesLabel="문항당 평균 시간 (초)" seriesMax={null} showTime={false} compact />
             </section>
-            <p className="text-xs text-gray-500">합 계산은 100 - 평균 오차율로 환산하며, 나머지 유형은 정답률입니다. 유형별 정보가 없는 과거 기록은 빈칸으로 표시합니다. 시간은 모든 유형을 합친 문항당 평균입니다.</p>
+            <p className="calculation-history-note text-xs text-gray-500">합 점수 = 100 - 평균 오차율{visibleTimeSeries.includes(legacyTimeSeries) ? ' · 기존 시간 기록은 구분 없음' : ''}</p>
         </div>
     );
 }

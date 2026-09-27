@@ -5,7 +5,7 @@ import PracticeHeader from './PracticeHeader';
 const formatError = rate => rate === null ? '산출 불가' : `${rate.toFixed(2)}%`;
 const formatResponse = value => value.trim() || '(공백)';
 
-export default function CalculationTraining({ problems, onComplete, onRestart, onExit }) {
+export default function CalculationTraining({ problems, calculatorUsed, onComplete, onRestart, onExit }) {
     const [page, setPage] = useState(0);
     const [answers, setAnswers] = useState(() => Array(problems.length).fill(''));
     const [results, setResults] = useState(null);
@@ -42,6 +42,7 @@ export default function CalculationTraining({ problems, onComplete, onRestart, o
             onComplete({
                 examType: 'ADDITION',
                 date: new Date().toLocaleString('ko-KR'),
+                calculatorUsed,
                 ...summary,
                 averageTime: Number((nextResults.reduce((sum, result) => sum + result.timeTaken, 0) / problems.length).toFixed(1)),
             });
@@ -70,7 +71,7 @@ export default function CalculationTraining({ problems, onComplete, onRestart, o
                             </div>
                         ))}
                     </div>
-                    <p className="mb-2">전체 문항당 평균 시간: <strong>{averageTime.toFixed(1)}초</strong></p>
+                    <p className="mb-2">전체 문항당 평균 시간: <strong>{averageTime.toFixed(1)}초</strong> · 계산기 {calculatorUsed ? '사용' : '미사용'}</p>
                     <p className="text-xs text-gray-600 mb-6">합의 빈칸·숫자가 아닌 입력 {summary.invalidCount}개는 평균 오차율에서 제외됩니다.</p>
                     <button type="button" onClick={onRestart} className="primary-button">다른 훈련하기</button>
                 </section>

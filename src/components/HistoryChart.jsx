@@ -6,8 +6,8 @@ import { Chart } from 'chart.js/auto';
  * @param {Object} props
  * @param {Array<{accuracy: number, averageTime: number}>} props.history
  */
-const HistoryChart = ({ history, metric = 'accuracy', series, showTime = true, timeLabel = '평균 시간 (초)' }) => {
-    const metricLabel = series ? '정답률 및 환산 점수 (%)' : metric === 'averageTime' ? '전체 문항 평균 시간 (초)' : metric === 'averageErrorRate' ? '평균 오차율 (%, 낮을수록 좋음)' : metric === 'comparisonAccuracy' ? '증가율 비교 정답률 (%)' : '정답률 (%)';
+const HistoryChart = ({ history, metric = 'accuracy', series, seriesLabel = '정답률 및 환산 점수 (%)', seriesMax = 100, showTime = true, timeLabel = '평균 시간 (초)', compact = false }) => {
+    const metricLabel = series ? seriesLabel : metric === 'averageTime' ? '전체 문항 평균 시간 (초)' : metric === 'averageErrorRate' ? '평균 오차율 (%, 낮을수록 좋음)' : metric === 'comparisonAccuracy' ? '증가율 비교 정답률 (%)' : '정답률 (%)';
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
 
@@ -22,7 +22,7 @@ const HistoryChart = ({ history, metric = 'accuracy', series, showTime = true, t
         chartInstance.current = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: displayHistory.map((_, i) => `${i + 1}회`),
+                labels: displayHistory.map((record, i) => record.dateKey ? record.dateKey.slice(5).replace('-', '/') : `${i + 1}회`),
                 datasets: [
                     ...(series ? series.map(item => ({
                         label: item.label,
@@ -73,7 +73,7 @@ const HistoryChart = ({ history, metric = 'accuracy', series, showTime = true, t
                         display: true,
                         position: 'left',
                         min: series ? Math.floor(seriesMin / 10) * 10 : 0,
-                        ...(series || ['accuracy', 'comparisonAccuracy'].includes(metric) ? { max: 100 } : {}),
+                        ...(series ? seriesMax == null ? {} : { max: seriesMax } : ['accuracy', 'comparisonAccuracy'].includes(metric) ? { max: 100 } : {}),
                         title: { display: true, text: metricLabel },
                     },
                     ...(showTime ? { y1: {
@@ -90,12 +90,12 @@ const HistoryChart = ({ history, metric = 'accuracy', series, showTime = true, t
         return () => {
             if (chartInstance.current) chartInstance.current.destroy();
         };
-    }, [history, metric, metricLabel, series, showTime, timeLabel]);
+    }, [history, metric, metricLabel, series, seriesMax, showTime, timeLabel]);
 
     if (history.length === 0) return <p className="helper-text py-5">표시할 기록이 없습니다.</p>;
-    return <div className="h-64 w-full">
-        <canvas ref={chartRef} role="img" aria-label={`${metricLabel} 추이, 최근 ${Math.min(history.length, 20)}회 기록`} />
-        <p className="sr-only">{history.slice(-20).map((record, index) => `${index + 1}회: ${series ? series.map(item => `${item.label} ${record[item.key] ?? '기록 없음'}`).join(', ') : record[metric] ?? '기록 없음'}${showTime ? `, 시간 ${record.averageTime ?? '기록 없음'}초` : ''}`).join('. ')}</p>
+    return <div className={compact ? 'h-52 w-full' : 'h-64 w-full'}>
+        <canvas ref={chartRef} role="img" aria-label={`${metricLabel} 추이, 최근 ${Math.min(history.length, 20)}일 기록`} />
+        <p className="sr-only">{history.slice(-20).map((record, index) => `${record.dateKey ?? `${index + 1}회`}: ${series ? series.map(item => `${item.label} ${record[item.key] ?? '기록 없음'}`).join(', ') : record[metric] ?? '기록 없음'}${showTime ? `, 시간 ${record.averageTime ?? '기록 없음'}초` : ''}`).join('. ')}</p>
     </div>;
 };
 

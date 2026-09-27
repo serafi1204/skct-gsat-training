@@ -27,10 +27,13 @@ test('preferences are normalized and survive cookie reload', () => withCookies((
     assert.equal(loadPreferences().tablePlotPercent, 75);
     assert.equal(loadPreferences().plotMax, 8000);
     assert.equal(normalizePreferences({ sequenceMax: -1 }).sequenceMax, 300);
+    savePreferences({ ...DEFAULT_PREFERENCES, calculatorUsed: true });
+    assert.equal(loadPreferences().calculatorUsed, true);
+    assert.equal(normalizePreferences({ calculatorUsed: 'true' }).calculatorUsed, false);
 }));
 
 test('result plot metrics survive cookie reload and can be cleared', () => withCookies(values => {
-    const record = { examType: 'ADDITION', averageTime: 2.1, byType: [
+    const record = { examType: 'ADDITION', dateKey: '2026-09-27', calculatorUsed: false, averageTime: 2.1, byType: [
         { type: 'average', accuracy: 75 }, { type: 'sum', averageErrorRate: 1.2 },
         { type: 'growth', accuracy: 50 }, { type: 'share', accuracy: 100 },
     ] };
@@ -39,6 +42,8 @@ test('result plot metrics survive cookie reload and can be cleared', () => withC
     assert.equal(loaded.length, 20);
     assert.equal(loaded[0].byType.find(item => item.type === 'sum').averageErrorRate, 1.2);
     assert.equal(loaded[0].averageTime, 2.1);
+    assert.equal(loaded[0].dateKey, '2026-09-27');
+    assert.equal(loaded[0].calculatorUsed, false);
     assert.ok(values.get('skctPlotAddition').length < 4000);
     clearPlotHistory();
     assert.deepEqual(loadPlotHistory(), []);
