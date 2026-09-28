@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
 import { formatOmrText, normalizeOmrText, parseOmrText, summarizeOmrAnswers } from '../utils/omrText.js';
+import { loadOmrText, saveOmrText } from '../utils/omrStorage.js';
 import { PracticeTimers } from './PracticeTimers.jsx';
 
 const calculatorKeys = [
@@ -204,10 +205,13 @@ export function PracticeToolStack({ active, timers, onTimerAction, showTimers = 
 }
 
 export default function PracticeTools({ active, timers, onTimerAction }) {
-    const [answers, setAnswers] = useState(() => Array(100).fill(null));
-    const [answerText, setAnswerText] = useState('');
-    const [correctText, setCorrectText] = useState('');
+    const [answerText, setAnswerText] = useState(() => loadOmrText('answers'));
+    const [answers, setAnswers] = useState(() => parseOmrText(answerText));
+    const [correctText, setCorrectText] = useState(() => loadOmrText('correct'));
     const correctAnswers = parseOmrText(correctText);
+
+    useEffect(() => { saveOmrText('answers', answerText); }, [answerText]);
+    useEffect(() => { saveOmrText('correct', correctText); }, [correctText]);
 
     const selectAnswer = (question, choice) => {
         const next = answers.map((answer, index) => index === question ? (answer === choice ? null : choice) : answer);
