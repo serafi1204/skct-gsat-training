@@ -8,11 +8,13 @@ test('15-minute and 1-minute timers run independently and finish from wall-clock
     timers = updateTimer(timers, 'one', 'start', 1000);
     timers = tickTimers(timers, 61000);
     assert.equal(timers.one.complete, true);
+    assert.equal(formatTimer(timers.one.remainingMs), '01:00');
+    assert.equal(timers.one.endsAt, null);
     assert.equal(timers.fifteen.complete, false);
     assert.equal(formatTimer(timers.fifteen.remainingMs), '14:00');
     timers = tickTimers(timers, 901000);
     assert.equal(timers.fifteen.complete, true);
-    assert.equal(formatTimer(timers.fifteen.remainingMs), '00:00');
+    assert.equal(formatTimer(timers.fifteen.remainingMs), '15:00');
 });
 
 test('pause, resume, dismiss, and reset affect only the selected timer', () => {
@@ -24,9 +26,19 @@ test('pause, resume, dismiss, and reset affect only the selected timer', () => {
     timers = updateTimer(timers, 'one', 'start', 100000);
     timers = tickTimers(timers, 145000);
     assert.equal(timers.one.complete, true);
+    assert.equal(formatTimer(timers.one.remainingMs), '01:00');
     timers = updateTimer(timers, 'one', 'dismiss');
     assert.equal(timers.one.dismissed, true);
+    assert.equal(timers.one.complete, false);
     timers = updateTimer(timers, 'one', 'reset');
     assert.equal(formatTimer(timers.one.remainingMs), '01:00');
     assert.equal(timers.fifteen.remainingMs, 900000);
+});
+
+test('pausing after the deadline also resets and raises completion', () => {
+    const running = updateTimer(initialTimers(), 'one', 'start', 0);
+    const timers = updateTimer(running, 'one', 'pause', 61000);
+    assert.equal(timers.one.complete, true);
+    assert.equal(timers.one.remainingMs, 60000);
+    assert.equal(timers.one.endsAt, null);
 });

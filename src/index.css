@@ -32,8 +32,10 @@ input[type='number'] { -moz-appearance: textfield; }
 .tools-row { display: flex; align-items: flex-start; gap: 24px; }
 .tools-stack { display: flex; flex-direction: column; gap: 18px; width: 300px; flex: none; }
 .tool-timers { width: 300px; padding: 12px; border-radius: 12px; }
-.tool-timers h2 { margin: 0 0 7px; font-size: 15px; font-weight: 800; }
-.timer-row { display: flex; align-items: center; gap: 5px; min-height: 39px; padding: 4px 0; border-top: 1px solid #e4ecea; }
+.tool-timers-wide { width: 524px; max-width: 100%; }
+.timer-list { display: grid; }
+.tool-timers-wide .timer-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.timer-row { display: flex; align-items: center; gap: 5px; min-height: 39px; padding: 4px 0; }
 .timer-label { width: 31px; flex: none; color: #526770; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .timer-time { flex: 1; min-width: 0; color: #172b38; font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .timer-row button { flex: none; min-height: 28px; padding: 3px 7px; border: 1px solid #cfdbda; border-radius: 6px; background: #f7faf9; color: #244a50; font-size: 11px; font-weight: 700; }
@@ -45,9 +47,8 @@ input[type='number'] { -moz-appearance: textfield; }
 .timer-alert-content button { min-width: 120px; min-height: 46px; padding: 9px 20px; border: 2px solid #fff; border-radius: 9px; background: #fff; color: #991b1b; font-weight: 800; }
 .tool-pad, .tool-calculator { width: 300px; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
 .tool-pad { height: 300px; }
-.tool-calculator { height: 400px; padding: 0 12px 12px; }
+.tool-calculator { height: 400px; padding: 12px; }
 .tool-header { flex: 0 0 52px; display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 12px; border-bottom: 1px solid #e4ecea; }
-.tool-calculator .tool-header { padding: 0; }
 .tool-header h2 { margin: 0; font-size: 17px; font-weight: 800; }
 .tool-switch, .tool-actions { display: flex; align-items: center; gap: 3px; }
 .tool-switch button, .tool-actions button { padding: 6px 7px; border: 0; border-radius: 6px; background: transparent; color: #526770; font-size: 12px; font-weight: 700; white-space: nowrap; }
@@ -56,7 +57,7 @@ input[type='number'] { -moz-appearance: textfield; }
 .tool-pad-content { flex: 1; min-height: 0; background: #fff; }
 .tool-memo, .tool-canvas { width: 100%; height: 100%; }
 .tool-memo { display: block; padding: 14px; border: 0; outline: none; resize: none; background: transparent; color: #172b38; font-size: 15px; line-height: 1.55; }
-.tool-canvas { display: block; touch-action: none; cursor: crosshair; }
+.tool-canvas { display: block; touch-action: none; cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='4' cy='4' r='2.5' fill='%23172b38' stroke='white' stroke-width='1'/%3E%3C/svg%3E") 4 4, default; }
 .calculator-display { flex: 0 0 96px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; min-width: 0; padding: 4px 8px 8px; text-align: right; }
 .calculator-previous { max-width: 100%; overflow: hidden; color: #71828a; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .calculator-expression { max-width: 100%; overflow: hidden; color: #52716e; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
@@ -67,12 +68,11 @@ input[type='number'] { -moz-appearance: textfield; }
 .calculator-keys button.operator { color: #0b665f; background: #eaf6f2; }
 .calculator-keys button.equals { grid-row: span 2; color: #fff; background: #0f766e; }
 .calculator-keys button.zero { grid-column: span 2; }
-.tool-answer-sheet { width: 200px; height: 718px; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
-.omr-count { color: #52716e; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.omr-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid #dce6e5; }
+.tool-answer-sheet { width: 200px; height: 718px; max-width: 100%; display: flex; flex-direction: column; overflow: hidden; padding: 10px 8px 12px; border-radius: 12px; }
+.omr-tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow: hidden; border: 1px solid #dce6e5; border-radius: 8px; }
 .omr-tabs button { min-width: 0; padding: 5px 0; border: 0; border-bottom: 2px solid transparent; background: #fff; color: #62777e; font-size: 10px; font-weight: 700; line-height: 1.2; }
 .omr-tabs button[aria-selected='true'] { border-bottom-color: #0f766e; background: #eaf6f2; color: #0b665f; }
-.omr-scroll { min-height: 0; overflow-y: auto; padding: 0 7px 12px; }
+.omr-scroll { flex: 1; display: grid; grid-template-rows: repeat(20, minmax(30px, 1fr)); min-height: 0; overflow-y: auto; padding: 8px 2px 0; }
 .omr-row { display: flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 3px; border-radius: 4px; }
 .omr-row.shaded { background: #edf5f3; }
 .omr-number { width: 21px; flex: none; color: #526770; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
@@ -87,10 +87,29 @@ input[type='number'] { -moz-appearance: textfield; }
 .omr-text-panel label { display: flex; flex-direction: column; gap: 6px; min-width: 0; color: #244a50; font-size: 13px; font-weight: 800; }
 .omr-text-panel small { color: #71828a; font-size: 11px; font-weight: 500; }
 .omr-text-panel textarea { width: 100%; height: 110px; padding: 8px; border: 1px solid #cfdbda; border-radius: 7px; resize: vertical; color: #172b38; background: #fff; font-family: ui-monospace, Consolas, monospace; font-size: 12px; line-height: 18px; letter-spacing: .03em; white-space: pre; }
+.omr-summary { width: 524px; max-width: 100%; padding: 14px; border-radius: 12px; }
+.omr-summary h2 { margin: 0 0 10px; font-size: 16px; font-weight: 800; }
+.omr-summary table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.omr-summary th, .omr-summary td { padding: 7px 6px; border-bottom: 1px solid #e4ecea; text-align: center; }
+.omr-summary th:first-child { text-align: left; }
+.omr-summary thead th { color: #526770; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.omr-summary tbody th { font-weight: 600; }
+.omr-summary tfoot { background: #eaf6f2; color: #0b665f; font-weight: 800; }
+.omr-summary tfoot th, .omr-summary tfoot td { border-bottom: 0; }
+.omr-summary p { margin: 10px 0 0; color: #647983; font-size: 12px; line-height: 1.5; }
 @media (max-width: 560px) {
     .tools-main { padding-right: 8px; padding-left: 8px; }
+    .tool-timers-wide { width: 300px; }
+    .tool-timers-wide .timer-list { gap: 8px; }
+    .tool-timers-wide .timer-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tool-timers-wide .timer-label { width: auto; }
+    .tool-timers-wide .timer-time { text-align: right; font-size: 16px; }
+    .tool-timers-wide .timer-row button { min-width: 0; padding: 3px 2px; }
     .tool-answer-sheet { display: none; }
     .omr-text-panel { width: 300px; grid-template-columns: 1fr; }
+    .omr-summary { width: 300px; }
+    .omr-summary table { font-size: 12px; }
+    .omr-summary th, .omr-summary td { padding-right: 3px; padding-left: 3px; }
 }
 @media (max-width: 316px) {
     .tools-main { padding-right: 0; padding-left: 0; }

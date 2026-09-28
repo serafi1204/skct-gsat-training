@@ -37,3 +37,24 @@ export function formatOmrText(answers) {
     const digits = Array.from({ length: lastMarked + 1 }, (_, index) => answers[index] || 0).join('');
     return digits.match(/.{1,20}/g).join('\n');
 }
+
+export function summarizeOmrAnswers(answers, correctAnswers) {
+    const sections = Array.from({ length: OMR_SECTION_COUNT }, (_, section) => {
+        const counts = { solved: 0, correct: 0, incorrect: 0 };
+        for (let offset = 0; offset < OMR_SECTION_SIZE; offset += 1) {
+            const index = section * OMR_SECTION_SIZE + offset;
+            if (!answers[index]) continue;
+            counts.solved += 1;
+            if (!correctAnswers[index]) continue;
+            if (answers[index] === correctAnswers[index]) counts.correct += 1;
+            else counts.incorrect += 1;
+        }
+        return counts;
+    });
+    const total = sections.reduce((sum, counts) => ({
+        solved: sum.solved + counts.solved,
+        correct: sum.correct + counts.correct,
+        incorrect: sum.incorrect + counts.incorrect,
+    }), { solved: 0, correct: 0, incorrect: 0 });
+    return { sections, total };
+}

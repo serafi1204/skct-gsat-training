@@ -3,21 +3,22 @@ import { formatTimer } from '../utils/practiceTimers.js';
 
 const timerLabels = { fifteen: '15분', one: '1분' };
 
-export function PracticeTimers({ timers, onAction }) {
-    return <section className="surface tool-timers" aria-label="타이머">
-        <h2>타이머</h2>
+export function PracticeTimers({ timers, onAction, wide = false }) {
+    return <section className={`surface tool-timers ${wide ? 'tool-timers-wide' : ''}`} aria-label="타이머">
+        <div className="timer-list">
         {Object.entries(timerLabels).map(([id, label]) => {
             const timer = timers[id];
             const running = timer.endsAt !== null;
             return <div className={`timer-row ${timer.complete ? 'timer-complete' : ''}`} key={id}>
                 <span className="timer-label">{label}</span>
-                <span className="timer-time" role="timer" aria-label={`${label} 타이머 ${timer.complete ? '완료' : `${formatTimer(timer.remainingMs)} 남음`}`}>{timer.complete ? '완료' : formatTimer(timer.remainingMs)}</span>
+                <span className="timer-time" role="timer" aria-label={`${label} 타이머 ${timer.complete ? '완료, 초기화됨' : `${formatTimer(timer.remainingMs)} 남음`}`}>{formatTimer(timer.remainingMs)}</span>
                 <button type="button" onClick={() => onAction(id, running ? 'pause' : 'start')} aria-label={`${label} 타이머 ${running ? '일시정지' : '시작'}`}>
                     {running ? '일시정지' : '시작'}
                 </button>
                 <button type="button" onClick={() => onAction(id, 'reset')} aria-label={`${label} 타이머 초기화`}>초기화</button>
             </div>;
         })}
+        </div>
     </section>;
 }
 

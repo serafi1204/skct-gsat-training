@@ -12,15 +12,15 @@ export function updateTimer(timers, id, action, now = Date.now()) {
     const timer = timers[id];
     let next;
     if (action === 'start') {
-        const remainingMs = timer.complete ? TIMER_DURATIONS[id] : timer.remainingMs;
+        const remainingMs = timer.remainingMs;
         next = { remainingMs, endsAt: now + remainingMs, complete: false, dismissed: false };
     } else if (action === 'pause' && timer.endsAt !== null) {
         const remainingMs = Math.max(0, timer.endsAt - now);
-        next = { remainingMs, endsAt: null, complete: remainingMs === 0, dismissed: false };
+        next = { remainingMs: remainingMs || TIMER_DURATIONS[id], endsAt: null, complete: remainingMs === 0, dismissed: false };
     } else if (action === 'reset') {
         next = { remainingMs: TIMER_DURATIONS[id], endsAt: null, complete: false, dismissed: false };
     } else if (action === 'dismiss' && timer.complete) {
-        next = { ...timer, dismissed: true };
+        next = { ...timer, complete: false, dismissed: true };
     } else {
         return timers;
     }
@@ -34,7 +34,7 @@ export function tickTimers(timers, now = Date.now()) {
         if (timer.endsAt === null) continue;
         const remainingMs = Math.max(0, timer.endsAt - now);
         if (remainingMs === 0) {
-            updated = { ...updated, [id]: { remainingMs: 0, endsAt: null, complete: true, dismissed: false } };
+            updated = { ...updated, [id]: { remainingMs: TIMER_DURATIONS[id], endsAt: null, complete: true, dismissed: false } };
         } else if (Math.ceil(remainingMs / 1000) !== Math.ceil(timer.remainingMs / 1000)) {
             updated = { ...updated, [id]: { ...timer, remainingMs } };
         }

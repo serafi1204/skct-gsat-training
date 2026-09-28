@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
-import { formatOmrText, normalizeOmrText, parseOmrText } from '../utils/omrText.js';
+import { formatOmrText, normalizeOmrText, parseOmrText, summarizeOmrAnswers } from '../utils/omrText.js';
 import { PracticeTimers } from './PracticeTimers.jsx';
 
 const calculatorKeys = [
@@ -107,7 +107,6 @@ function Calculator({ active }) {
     }, [active]);
 
     return <section className="surface tool-calculator" aria-label="계산기">
-        <div className="tool-header"><h2>계산기</h2></div>
         <div className="calculator-display" aria-live="polite">
             <div className="calculator-previous">{state.previousResult || '\u00a0'}</div>
             <div className="calculator-expression">{calculatorExpression(state) || '\u00a0'}</div>
@@ -123,10 +122,8 @@ function Calculator({ active }) {
 
 function AnswerSheet({ answers, correctAnswers, onSelectAnswer }) {
     const [activeSection, setActiveSection] = useState(0);
-    const markedCount = answers.filter(Boolean).length;
 
     return <section className="surface tool-answer-sheet" aria-label="OMR 답안지">
-        <div className="tool-header"><h2>OMR 답안지</h2><span className="omr-count">{markedCount}/100</span></div>
         <div className="omr-tabs" role="tablist" aria-label="OMR 영역" onKeyDown={event => {
             const next = event.key === 'ArrowRight' ? (activeSection + 1) % omrSections.length
                 : event.key === 'ArrowLeft' ? (activeSection + omrSections.length - 1) % omrSections.length
@@ -181,9 +178,26 @@ function AnswerTextFields({ answerText, correctText, onAnswerTextChange, onCorre
     </section>;
 }
 
-export function PracticeToolStack({ active, timers, onTimerAction }) {
+function AnswerSummary({ answers, correctAnswers }) {
+    const { sections, total } = summarizeOmrAnswers(answers, correctAnswers);
+    const ungraded = total.solved - total.correct - total.incorrect;
+
+    return <section className="surface omr-summary" aria-labelledby="omr-summary-heading">
+        <h2 id="omr-summary-heading">풀이 결과</h2>
+        <table>
+            <thead><tr><th scope="col">세션</th><th scope="col">푼 개수</th><th scope="col">정답개수</th><th scope="col">오답개수</th></tr></thead>
+            <tbody>{sections.map((counts, index) => <tr key={omrSections[index]}>
+                <th scope="row">{omrSections[index]}</th><td>{counts.solved}</td><td>{counts.correct}</td><td>{counts.incorrect}</td>
+            </tr>)}</tbody>
+            <tfoot><tr><th scope="row">종합</th><td>{total.solved}</td><td>{total.correct}</td><td>{total.incorrect}</td></tr></tfoot>
+        </table>
+        {ungraded > 0 && <p>정답이 입력되지 않은 {ungraded}문항은 정답·오답 집계에서 제외했습니다.</p>}
+    </section>;
+}
+
+export function PracticeToolStack({ active, timers, onTimerAction, showTimers = true }) {
     return <div className="tools-stack">
-        <PracticeTimers timers={timers} onAction={onTimerAction} />
+        {showTimers && <PracticeTimers timers={timers} onAction={onTimerAction} />}
         <ScratchPad />
         <Calculator active={active} />
     </div>;
@@ -208,11 +222,13 @@ export default function PracticeTools({ active, timers, onTimerAction }) {
     };
 
     return <div className="tools-page">
+        <PracticeTimers timers={timers} onAction={onTimerAction} wide />
         <div className="tools-row">
             <AnswerSheet answers={answers} correctAnswers={correctAnswers} onSelectAnswer={selectAnswer} />
-            <PracticeToolStack active={active} timers={timers} onTimerAction={onTimerAction} />
+            <PracticeToolStack active={active} timers={timers} onTimerAction={onTimerAction} showTimers={false} />
         </div>
         <AnswerTextFields answerText={answerText} correctText={correctText}
             onAnswerTextChange={changeAnswerText} onCorrectTextChange={value => setCorrectText(normalizeOmrText(value))} />
+        <AnswerSummary answers={answers} correctAnswers={correctAnswers} />
     </div>;
 }
