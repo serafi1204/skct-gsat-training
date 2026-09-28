@@ -32,7 +32,7 @@ const modeHistory = (history, mode) => history.filter(record => mode === 'TABLE'
     ? ['TABLE', 'PLOT'].includes(record.examType)
     : record.examType === mode);
 
-export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory }) {
+export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory, timers, onTimerAction }) {
     const [activeTab, setActiveTab] = useState('training');
     const { examType, totalRounds, problemCount } = preferences;
     const selectedMode = modes.find(mode => mode.id === examType);
@@ -112,7 +112,7 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                 </div>
             </main>
             <main className="tools-main" id="tools-panel" role="tabpanel" aria-labelledby="tools-tab" hidden={activeTab !== 'tools'}>
-                <PracticeTools active={activeTab === 'tools'} />
+                <PracticeTools active={activeTab === 'tools'} timers={timers} onTimerAction={onTimerAction} />
             </main>
         </div>
     );

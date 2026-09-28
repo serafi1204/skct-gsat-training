@@ -31,6 +31,18 @@ input[type='number'] { -moz-appearance: textfield; }
 .tools-page { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .tools-row { display: flex; align-items: flex-start; gap: 24px; }
 .tools-stack { display: flex; flex-direction: column; gap: 18px; width: 300px; flex: none; }
+.tool-timers { width: 300px; padding: 12px; border-radius: 12px; }
+.tool-timers h2 { margin: 0 0 7px; font-size: 15px; font-weight: 800; }
+.timer-row { display: flex; align-items: center; gap: 5px; min-height: 39px; padding: 4px 0; border-top: 1px solid #e4ecea; }
+.timer-label { width: 31px; flex: none; color: #526770; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.timer-time { flex: 1; min-width: 0; color: #172b38; font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.timer-row button { flex: none; min-height: 28px; padding: 3px 7px; border: 1px solid #cfdbda; border-radius: 6px; background: #f7faf9; color: #244a50; font-size: 11px; font-weight: 700; }
+.timer-row button:hover { background: #eaf6f2; }
+.timer-complete .timer-time { color: #b91c1c; }
+.timer-alert-backdrop { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 24px; background: #b91c1c; color: #fff; text-align: center; }
+.timer-alert-content h2 { margin: 0 0 12px; font-size: clamp(30px, 7vw, 64px); font-weight: 900; }
+.timer-alert-content p { margin: 0 0 30px; font-size: clamp(18px, 3vw, 26px); font-weight: 700; }
+.timer-alert-content button { min-width: 120px; min-height: 46px; padding: 9px 20px; border: 2px solid #fff; border-radius: 9px; background: #fff; color: #991b1b; font-weight: 800; }
 .tool-pad, .tool-calculator { width: 300px; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; }
 .tool-pad { height: 300px; }
 .tool-calculator { height: 400px; padding: 0 12px 12px; }

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
 import { formatOmrText, normalizeOmrText, parseOmrText } from '../utils/omrText.js';
+import { PracticeTimers } from './PracticeTimers.jsx';
 
 const calculatorKeys = [
     ['C', 'C'], ['⌫', 'Backspace'], ['÷', '/'], ['×', '*'],
@@ -180,14 +181,15 @@ function AnswerTextFields({ answerText, correctText, onAnswerTextChange, onCorre
     </section>;
 }
 
-export function PracticeToolStack({ active }) {
+export function PracticeToolStack({ active, timers, onTimerAction }) {
     return <div className="tools-stack">
+        <PracticeTimers timers={timers} onAction={onTimerAction} />
         <ScratchPad />
         <Calculator active={active} />
     </div>;
 }
 
-export default function PracticeTools({ active }) {
+export default function PracticeTools({ active, timers, onTimerAction }) {
     const [answers, setAnswers] = useState(() => Array(100).fill(null));
     const [answerText, setAnswerText] = useState('');
     const [correctText, setCorrectText] = useState('');
@@ -208,7 +210,7 @@ export default function PracticeTools({ active }) {
     return <div className="tools-page">
         <div className="tools-row">
             <AnswerSheet answers={answers} correctAnswers={correctAnswers} onSelectAnswer={selectAnswer} />
-            <PracticeToolStack active={active} />
+            <PracticeToolStack active={active} timers={timers} onTimerAction={onTimerAction} />
         </div>
         <AnswerTextFields answerText={answerText} correctText={correctText}
             onAnswerTextChange={changeAnswerText} onCorrectTextChange={value => setCorrectText(normalizeOmrText(value))} />

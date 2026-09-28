@@ -11,7 +11,9 @@ import { generateAdditionProblems } from './utils/generateAdditionProblems';
 import CalculationTraining from './components/CalculationTraining';
 import ConfirmDialog from './components/ConfirmDialog';
 import { PracticeToolStack } from './components/PracticeTools';
+import { TimerAlert } from './components/PracticeTimers';
 import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
+import { initialTimers, tickTimers, updateTimer } from './utils/practiceTimers.js';
 import { localDateKey } from './utils/dailyTodo.js';
 import { DAILY_HISTORY_VERSION_KEY, prepareDailyHistory } from './utils/dailyHistory.js';
 
@@ -32,6 +34,7 @@ const App = () => {
     const [history, setHistory] = useState([]);
     const [sequenceProblems, setSequenceProblems] = useState([]);
     const [pendingAction, setPendingAction] = useState(null);
+    const [timers, setTimers] = useState(initialTimers);
 
     // 세션 최종 결과용 상태 (채점 로직 버그 해결용)
     const [sessionResult, setSessionResult] = useState(null);
@@ -58,6 +61,16 @@ const App = () => {
     }, []);
 
     useEffect(() => { savePreferences(preferences); }, [preferences]);
+
+    useEffect(() => {
+        const interval = window.setInterval(() => setTimers(current => tickTimers(current, Date.now())), 250);
+        return () => window.clearInterval(interval);
+    }, []);
+
+    const handleTimerAction = (id, action) => setTimers(current => updateTimer(current, id, action, Date.now()));
+    const completedTimers = Object.keys(timers).filter(id => timers[id].complete && !timers[id].dismissed);
+    const dismissTimerAlert = () => setTimers(current => Object.keys(current).reduce((next, id) =>
+        next[id].complete && !next[id].dismissed ? updateTimer(next, id, 'dismiss') : next, current));
 
     const updatePreference = (key, value) => setPreferences(previous => normalizePreferences({ ...previous, [key]: value }));
 
@@ -239,6 +252,8 @@ const App = () => {
                 onStart={handleStart}
                 history={history}
                 onClearHistory={() => setPendingAction('clearHistory')}
+                timers={timers}
+                onTimerAction={handleTimerAction}
             />;
     } else if (gameState === 'PLAYING') {
         if (examType === 'ADDITION') {
@@ -298,7 +313,7 @@ const App = () => {
         {gameState === 'PLAYING' ? <div className="playing-layout">
             <div className="playing-main">{screen}</div>
             <aside className="playing-tools" aria-label="훈련 풀이 도구">
-                <PracticeToolStack active />
+                <PracticeToolStack active timers={timers} onTimerAction={handleTimerAction} />
             </aside>
         </div> : screen}
         {pendingAction && <ConfirmDialog
@@ -309,6 +324,7 @@ const App = () => {
             onConfirm={confirmPendingAction}
             onCancel={cancelPendingAction}
         />}
+        {completedTimers.length > 0 && <TimerAlert completed={completedTimers} onDismiss={dismissTimerAlert} />}
     </>;
 };
 
