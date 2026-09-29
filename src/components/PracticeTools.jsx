@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
 import { formatOmrText, normalizeOmrText, parseOmrText, summarizeOmrAnswers } from '../utils/omrText.js';
+import { MOCK_EXAM_SECTIONS } from '../utils/mockExamRecords.js';
 import { PracticeTimers } from './PracticeTimers.jsx';
+import MockExamForm from './MockExamForm.jsx';
 
 const calculatorKeys = [
     ['C', 'C'], ['⌫', 'Backspace'], ['÷', '/'], ['×', '*'],
@@ -10,7 +12,7 @@ const calculatorKeys = [
     ['1', '1'], ['2', '2'], ['3', '3'], ['=', '='],
     ['0', '0'], ['.', '.'],
 ];
-const omrSections = ['언어이해', '자료해석', '창의수리', '언어추리', '수열추리'];
+const omrSections = MOCK_EXAM_SECTIONS;
 
 function ScratchPad() {
     const [mode, setMode] = useState('memo');
@@ -203,7 +205,7 @@ export function PracticeToolStack({ active, timers, onTimerAction, showTimers = 
     </div>;
 }
 
-export default function PracticeTools({ active, timers, onTimerAction, omr, onOmrChange }) {
+export default function PracticeTools({ active, timers, onTimerAction, omr, onOmrChange, onAddMockExam }) {
     const answerText = omr.answers;
     const answers = parseOmrText(answerText);
     const correctText = omr.correct;
@@ -228,5 +230,6 @@ export default function PracticeTools({ active, timers, onTimerAction, omr, onOm
         <AnswerTextFields answerText={answerText} correctText={correctText}
             onAnswerTextChange={changeAnswerText} onCorrectTextChange={value => onOmrChange({ correct: normalizeOmrText(value) })} />
         <AnswerSummary answers={answers} correctAnswers={correctAnswers} />
+        <div className="mock-exam-tool-form"><MockExamForm title="현재 답안으로 모의고사 기록 추가" source={omr} includeText={false} onSave={onAddMockExam} /></div>
     </div>;
 }

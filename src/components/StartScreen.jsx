@@ -3,6 +3,7 @@ import HistoryChart from './HistoryChart';
 import CalculationHistory from './CalculationHistory';
 import DailyTodo from './DailyTodo';
 import PracticeTools from './PracticeTools';
+import MockExamRecords from './MockExamRecords.jsx';
 import { aggregateDailyHistory } from '../utils/dailyHistory.js';
 
 const modes = [
@@ -33,7 +34,8 @@ const modeHistory = (history, mode) => history.filter(record => mode === 'TABLE'
     : record.examType === mode);
 
 export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory,
-    todo, onTodoChange, omr, onOmrChange, saveStatus, saveError, onRetrySave, onSwitchCode,
+    todo, onTodoChange, omr, onOmrChange, mockExams, onAddMockExam, onUpdateMockExam, onDeleteMockExam,
+    saveStatus, saveError, onRetrySave, onSwitchCode,
     timers, onTimerAction }) {
     const [activeTab, setActiveTab] = useState('training');
     const { examType, totalRounds, problemCount } = preferences;
@@ -52,6 +54,7 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                     <nav className="main-tabs" role="tablist" aria-label="메인 화면">
                         <button type="button" role="tab" id="training-tab" aria-controls="training-panel" aria-selected={activeTab === 'training'} onClick={() => setActiveTab('training')}>훈련</button>
                         <button type="button" role="tab" id="tools-tab" aria-controls="tools-panel" aria-selected={activeTab === 'tools'} onClick={() => setActiveTab('tools')}>풀이 도구</button>
+                        <button type="button" role="tab" id="records-tab" aria-controls="records-panel" aria-selected={activeTab === 'records'} onClick={() => setActiveTab('records')}>기록</button>
                     </nav>
                     <div className="record-actions">
                         <span role="status" className={saveStatus === 'error' ? 'save-error' : ''}>
@@ -122,7 +125,11 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
             </main>
             <main className="tools-main" id="tools-panel" role="tabpanel" aria-labelledby="tools-tab" hidden={activeTab !== 'tools'}>
                 <PracticeTools active={activeTab === 'tools'} timers={timers} onTimerAction={onTimerAction}
-                    omr={omr} onOmrChange={onOmrChange} />
+                    omr={omr} onOmrChange={onOmrChange} onAddMockExam={onAddMockExam} />
+            </main>
+            <main className="mock-exam-main" id="records-panel" role="tabpanel" aria-labelledby="records-tab" hidden={activeTab !== 'records'}>
+                {activeTab === 'records' && <MockExamRecords records={mockExams} onAdd={onAddMockExam} onUpdate={onUpdateMockExam} onDelete={onDeleteMockExam}
+                    saveStatus={saveStatus} saveError={saveError} onRetrySave={onRetrySave} />}
             </main>
         </div>
     );

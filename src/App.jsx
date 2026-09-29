@@ -17,6 +17,7 @@ import { DEFAULT_PREFERENCES, normalizePreferences } from './utils/trainingPrefe
 import { useRemoteProfile } from './hooks/useRemoteProfile.js';
 import { initialTimers, tickTimers, updateTimer } from './utils/practiceTimers.js';
 import { localDateKey } from './utils/dailyTodo.js';
+import { normalizeOmrText } from './utils/omrText.js';
 
 const App = () => {
     const { profile, status: saveStatus, error: saveError, open, updateProfile, retry, switchCode } = useRemoteProfile();
@@ -63,6 +64,27 @@ const App = () => {
             history: [...previous.history, { ...record, dateKey: localDateKey() }],
         }));
     };
+
+    const addMockExam = input => {
+        const now = new Date().toISOString();
+        const record = { id: crypto.randomUUID(), name: input.name.trim(), date: input.date,
+            answers: normalizeOmrText(input.answers), correct: normalizeOmrText(input.correct),
+            createdAt: now, updatedAt: now };
+        updateProfile(previous => ({ ...previous, mockExams: [...previous.mockExams, record] }));
+        return record.id;
+    };
+
+    const updateMockExam = (id, input) => updateProfile(previous => ({ ...previous,
+        mockExams: previous.mockExams.map(record => record.id === id ? {
+            ...record, name: input.name.trim(), date: input.date,
+            answers: normalizeOmrText(input.answers), correct: normalizeOmrText(input.correct),
+            updatedAt: new Date().toISOString(),
+        } : record),
+    }));
+
+    const deleteMockExam = id => updateProfile(previous => ({ ...previous,
+        mockExams: previous.mockExams.filter(record => record.id !== id),
+    }));
 
     const handleExit = () => setPendingAction('exit');
     const cancelPendingAction = () => setPendingAction(null);
@@ -240,6 +262,10 @@ const App = () => {
                     todo: typeof updater === 'function' ? updater(previous.todo) : updater,
                 }))}
                 omr={profile.omr}
+                mockExams={profile.mockExams}
+                onAddMockExam={addMockExam}
+                onUpdateMockExam={updateMockExam}
+                onDeleteMockExam={deleteMockExam}
                 onOmrChange={patch => updateProfile(previous => ({ ...previous,
                     omr: { ...previous.omr, ...patch },
                 }))}
