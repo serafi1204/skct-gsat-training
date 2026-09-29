@@ -1,0 +1,16 @@
+# SKCT 연습실
+
+Vite/React 앱입니다. 훈련 설정, 훈련 기록, 오늘의 Todo, OMR TXT를 기록 코드별로 서버에 저장합니다. 기존 쿠키와 브라우저 로컬 저장 데이터는 읽거나 이전하지 않습니다. 메모장·그림판·타이머·계산기의 일시적인 상태는 저장하지 않습니다.
+
+## 로컬 개발
+
+`npm install` 후 `npm run dev`로 시작합니다. 로컬 API는 `.local-profile-data.json`에 데이터를 기록하며, 이 파일은 Git에서 제외됩니다.
+
+## Cloudflare Pages 배포
+
+1. Cloudflare D1 데이터베이스를 생성합니다.
+2. D1 콘솔에서 `schema.sql`을 실행합니다.
+3. Pages 프로젝트의 **Settings → Bindings**에서 D1 바인딩을 추가하고 변수 이름을 `DB`로 지정합니다. Production과 Preview 환경을 쓰는 경우 각각 연결합니다.
+4. Git 연동 또는 Wrangler로 다시 배포합니다. `/functions/api/profile.js`가 Pages Function으로 배포되어야 하므로, 정적 파일만 올리는 Dashboard Direct Upload 방식은 사용할 수 없습니다.
+
+사이트에 처음 접속하면 임의의 기록 코드를 입력합니다. 처음 사용하는 코드는 빈 기록으로 시작하며, 같은 코드를 입력하면 저장된 기록이 열립니다. 코드를 잊으면 복구할 수 없습니다. 여러 기기에서 동시에 수정할 경우 마지막 저장 내용이 남습니다.

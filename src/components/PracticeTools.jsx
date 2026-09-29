@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { calculatorExpression, calculatorInput, initialCalculator } from '../utils/practiceCalculator.js';
 import { formatOmrText, normalizeOmrText, parseOmrText, summarizeOmrAnswers } from '../utils/omrText.js';
-import { loadOmrText, saveOmrText } from '../utils/omrStorage.js';
 import { PracticeTimers } from './PracticeTimers.jsx';
 
 const calculatorKeys = [
@@ -204,25 +203,20 @@ export function PracticeToolStack({ active, timers, onTimerAction, showTimers = 
     </div>;
 }
 
-export default function PracticeTools({ active, timers, onTimerAction }) {
-    const [answerText, setAnswerText] = useState(() => loadOmrText('answers'));
-    const [answers, setAnswers] = useState(() => parseOmrText(answerText));
-    const [correctText, setCorrectText] = useState(() => loadOmrText('correct'));
+export default function PracticeTools({ active, timers, onTimerAction, omr, onOmrChange }) {
+    const answerText = omr.answers;
+    const answers = parseOmrText(answerText);
+    const correctText = omr.correct;
     const correctAnswers = parseOmrText(correctText);
-
-    useEffect(() => { saveOmrText('answers', answerText); }, [answerText]);
-    useEffect(() => { saveOmrText('correct', correctText); }, [correctText]);
 
     const selectAnswer = (question, choice) => {
         const next = answers.map((answer, index) => index === question ? (answer === choice ? null : choice) : answer);
-        setAnswers(next);
-        setAnswerText(formatOmrText(next));
+        onOmrChange({ answers: formatOmrText(next) });
     };
 
     const changeAnswerText = value => {
         const next = normalizeOmrText(value);
-        setAnswerText(next);
-        setAnswers(parseOmrText(next));
+        onOmrChange({ answers: next });
     };
 
     return <div className="tools-page">
@@ -232,7 +226,7 @@ export default function PracticeTools({ active, timers, onTimerAction }) {
             <PracticeToolStack active={active} timers={timers} onTimerAction={onTimerAction} showTimers={false} />
         </div>
         <AnswerTextFields answerText={answerText} correctText={correctText}
-            onAnswerTextChange={changeAnswerText} onCorrectTextChange={value => setCorrectText(normalizeOmrText(value))} />
+            onAnswerTextChange={changeAnswerText} onCorrectTextChange={value => onOmrChange({ correct: normalizeOmrText(value) })} />
         <AnswerSummary answers={answers} correctAnswers={correctAnswers} />
     </div>;
 }

@@ -32,7 +32,9 @@ const modeHistory = (history, mode) => history.filter(record => mode === 'TABLE'
     ? ['TABLE', 'PLOT'].includes(record.examType)
     : record.examType === mode);
 
-export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory, timers, onTimerAction }) {
+export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory,
+    todo, onTodoChange, omr, onOmrChange, saveStatus, saveError, onRetrySave, onSwitchCode,
+    timers, onTimerAction }) {
     const [activeTab, setActiveTab] = useState('training');
     const { examType, totalRounds, problemCount } = preferences;
     const selectedMode = modes.find(mode => mode.id === examType);
@@ -51,12 +53,19 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                         <button type="button" role="tab" id="training-tab" aria-controls="training-panel" aria-selected={activeTab === 'training'} onClick={() => setActiveTab('training')}>훈련</button>
                         <button type="button" role="tab" id="tools-tab" aria-controls="tools-panel" aria-selected={activeTab === 'tools'} onClick={() => setActiveTab('tools')}>풀이 도구</button>
                     </nav>
+                    <div className="record-actions">
+                        <span role="status" className={saveStatus === 'error' ? 'save-error' : ''}>
+                            {saveStatus === 'saving' ? '저장 중…' : saveStatus === 'error' ? '저장 실패' : '저장됨'}
+                        </span>
+                        {saveStatus === 'error' && <button type="button" onClick={onRetrySave} title={saveError}>재시도</button>}
+                        <button type="button" onClick={onSwitchCode} disabled={saveStatus === 'saving' || saveStatus === 'error'}>기록 변경</button>
+                    </div>
                 </div>
             </header>
 
             <main className="dashboard-layout" id="training-panel" role="tabpanel" aria-labelledby="training-tab" hidden={activeTab !== 'training'}>
                 <aside className="dashboard-sidebar" aria-label="오늘의 Todo와 훈련 선택">
-                    <DailyTodo modes={modes} />
+                    <DailyTodo modes={modes} todo={todo} onTodoChange={onTodoChange} />
                     <section className="mode-section" aria-labelledby="mode-heading">
                         <div className="section-heading"><h2 id="mode-heading">훈련 유형</h2></div>
                         <div className="mode-list">
@@ -112,7 +121,8 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
                 </div>
             </main>
             <main className="tools-main" id="tools-panel" role="tabpanel" aria-labelledby="tools-tab" hidden={activeTab !== 'tools'}>
-                <PracticeTools active={activeTab === 'tools'} timers={timers} onTimerAction={onTimerAction} />
+                <PracticeTools active={activeTab === 'tools'} timers={timers} onTimerAction={onTimerAction}
+                    omr={omr} onOmrChange={onOmrChange} />
             </main>
         </div>
     );

@@ -12,15 +12,18 @@ import CalculationTraining from './components/CalculationTraining';
 import ConfirmDialog from './components/ConfirmDialog';
 import { PracticeToolStack } from './components/PracticeTools';
 import { TimerAlert } from './components/PracticeTimers';
-import { loadPreferences, savePreferences, loadPlotHistory, savePlotHistory, clearPlotHistory, normalizePreferences } from './utils/trainingPreferences';
+import RecordAccess from './components/RecordAccess';
+import { DEFAULT_PREFERENCES, normalizePreferences } from './utils/trainingPreferences';
+import { useRemoteProfile } from './hooks/useRemoteProfile.js';
 import { initialTimers, tickTimers, updateTimer } from './utils/practiceTimers.js';
 import { localDateKey } from './utils/dailyTodo.js';
-import { DAILY_HISTORY_VERSION_KEY, prepareDailyHistory } from './utils/dailyHistory.js';
 
 const App = () => {
+    const { profile, status: saveStatus, error: saveError, open, updateProfile, retry, switchCode } = useRemoteProfile();
     // 공통 상태
     const [gameState, setGameState] = useState('START');
-    const [preferences, setPreferences] = useState(loadPreferences);
+    const preferences = profile?.preferences ?? DEFAULT_PREFERENCES;
+    const history = profile?.history ?? [];
     const { examType, totalRounds, problemCount } = preferences;
     const isDataExam = examType === 'TABLE';
     const [currentRound, setCurrentRound] = useState(0);
@@ -31,7 +34,6 @@ const App = () => {
     const [patternInputs, setPatternInputs] = useState([]);
     const [results, setResults] = useState([]);
     const [roundStartTime, setRoundStartTime] = useState(0);
-    const [history, setHistory] = useState([]);
     const [sequenceProblems, setSequenceProblems] = useState([]);
     const [pendingAction, setPendingAction] = useState(null);
     const [timers, setTimers] = useState(initialTimers);
@@ -41,26 +43,6 @@ const App = () => {
 
     const inputRefs = useRef([]);
     const submitBtnRef = useRef(null);
-
-    // 기존 회차별 기록은 한 번만 오늘 날짜로 묶는다.
-    useEffect(() => {
-        try {
-            const saved = JSON.parse(localStorage.getItem('skctHistory') || '[]');
-            const source = Array.isArray(saved) && saved.length ? saved : loadPlotHistory();
-            const migrateExisting = localStorage.getItem(DAILY_HISTORY_VERSION_KEY) !== '1';
-            const prepared = prepareDailyHistory(source, localDateKey(), migrateExisting);
-            setHistory(prepared);
-            if (migrateExisting || !Array.isArray(saved) || !saved.length || source.some(record => !record.dateKey)) {
-                localStorage.setItem('skctHistory', JSON.stringify(prepared));
-            }
-            localStorage.setItem(DAILY_HISTORY_VERSION_KEY, '1');
-            if (prepared.length) savePlotHistory(prepared);
-        } catch {
-            setHistory(prepareDailyHistory(loadPlotHistory()));
-        }
-    }, []);
-
-    useEffect(() => { savePreferences(preferences); }, [preferences]);
 
     useEffect(() => {
         const interval = window.setInterval(() => setTimers(current => tickTimers(current, Date.now())), 250);
@@ -72,13 +54,14 @@ const App = () => {
     const dismissTimerAlert = () => setTimers(current => Object.keys(current).reduce((next, id) =>
         next[id].complete && !next[id].dismissed ? updateTimer(next, id, 'dismiss') : next, current));
 
-    const updatePreference = (key, value) => setPreferences(previous => normalizePreferences({ ...previous, [key]: value }));
+    const updatePreference = (key, value) => updateProfile(previous => ({
+        ...previous, preferences: normalizePreferences({ ...previous.preferences, [key]: value }),
+    }));
 
     const saveRecord = record => {
-        const updated = [...history, { ...record, dateKey: localDateKey() }];
-        localStorage.setItem('skctHistory', JSON.stringify(updated));
-        savePlotHistory(updated);
-        setHistory(updated);
+        updateProfile(previous => ({ ...previous,
+            history: [...previous.history, { ...record, dateKey: localDateKey() }],
+        }));
     };
 
     const handleExit = () => setPendingAction('exit');
@@ -86,9 +69,7 @@ const App = () => {
     const confirmPendingAction = () => {
         if (pendingAction === 'exit') setGameState('START');
         if (pendingAction === 'clearHistory') {
-            localStorage.removeItem('skctHistory');
-            clearPlotHistory();
-            setHistory([]);
+            updateProfile(previous => ({ ...previous, history: [] }));
         }
         setPendingAction(null);
     };
@@ -243,6 +224,8 @@ const App = () => {
         setGameState('RESULT');
     };
 
+    if (!profile) return <RecordAccess onOpen={open} busy={saveStatus === 'loading'} error={saveError} />;
+
     // ------------------- 화면 렌더링 -------------------
     let screen = null;
     if (gameState === 'START') {
@@ -252,6 +235,18 @@ const App = () => {
                 onStart={handleStart}
                 history={history}
                 onClearHistory={() => setPendingAction('clearHistory')}
+                todo={profile.todo}
+                onTodoChange={updater => updateProfile(previous => ({ ...previous,
+                    todo: typeof updater === 'function' ? updater(previous.todo) : updater,
+                }))}
+                omr={profile.omr}
+                onOmrChange={patch => updateProfile(previous => ({ ...previous,
+                    omr: { ...previous.omr, ...patch },
+                }))}
+                saveStatus={saveStatus}
+                saveError={saveError}
+                onRetrySave={retry}
+                onSwitchCode={switchCode}
                 timers={timers}
                 onTimerAction={handleTimerAction}
             />;
@@ -310,6 +305,9 @@ const App = () => {
     }
 
     return <>
+        {gameState !== 'START' && saveStatus === 'error' && <div className="remote-save-alert" role="alert">
+            기록 저장 실패: {saveError} <button type="button" onClick={retry}>재시도</button>
+        </div>}
         {gameState === 'PLAYING' ? <div className="playing-layout">
             <div className="playing-main">{screen}</div>
             <aside className="playing-tools" aria-label="훈련 풀이 도구">
