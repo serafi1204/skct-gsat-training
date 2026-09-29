@@ -67,6 +67,15 @@ export function analyzeMockExams(records) {
     const sectionMean = (index, key) => recent.length
         ? Math.round(recent.reduce((sum, record) => sum + record.result.sections[index][key], 0) / recent.length * 10) / 10
         : null;
+    const totalMean = key => recent.length
+        ? Math.round(recent.reduce((sum, record) => sum + record.result.total[key], 0) / recent.length * 10) / 10
+        : null;
+    const totalAverage = {
+        attempted: totalMean('attempted'),
+        score: totalMean('correct'),
+        wrong: totalMean('wrong'),
+        unanswered: totalMean('unanswered'),
+    };
     const sectionAverages = MOCK_EXAM_SECTIONS.map((name, index) => {
         const wrong = sectionMean(index, 'wrong');
         const unanswered = sectionMean(index, 'unanswered');
@@ -83,6 +92,6 @@ export function analyzeMockExams(records) {
     return {
         sorted, latest, previous, recentAverage: mean(recent), earlierAverage: mean(earlier),
         recentCount: recent.length, weakestSections,
-        sectionAverages, weakest: weakestSections[0] ?? null,
+        sectionAverages, totalAverage, weakest: weakestSections[0] ?? null,
     };
 }

@@ -18,7 +18,7 @@ function MockExamStackedChart({ records, focus, onSelect }) {
                 const context = chart.ctx;
                 const base = chart.scales.y.getPixelForValue(0);
                 context.save();
-                context.fillStyle = '#dce8e5';
+                context.fillStyle = '#a9c8be';
                 for (const [index, record] of records.entries()) {
                     const bar = chart.getDatasetMeta(0).data[index];
                     if (!bar) continue;
@@ -154,7 +154,7 @@ export default function MockExamRecords({ records, onAdd, onUpdate, onDelete, sa
                 </table>
                 <div className="mock-exam-form-actions"><button className="secondary-button" type="button" onClick={() => setEditor(selected.id)}>수정</button><button className="text-button danger" type="button" onClick={() => setDeletingId(selected.id)}>삭제</button></div>
             </section>}
-            <section className="surface mock-exam-analysis"><h2>영역별 최근 성적 <small>최근 {analysis.recentCount}회 평균 · 20문항</small></h2>
+            <section className="surface mock-exam-analysis"><h2>영역별 최근 성적 <small>최근 {analysis.recentCount}회 평균 · 영역 20문항 / 합산 100문항</small></h2>
                 <div className="mock-exam-chart-key"><span className="mock-exam-chart-swatch" aria-hidden="true" />푼 문항<span>색 막대: 정답</span></div>
                 <div className="mock-exam-section-bars">{analysis.sectionAverages.map((section, index) => <div key={section.name} className="mock-exam-section-row">
                     <span>{section.name}</span><div className="mock-exam-section-track" role="img" aria-label={`${section.name}: 풀이 ${section.attempted}, 정답 ${section.score}, 20문항 기준`}>
@@ -162,7 +162,15 @@ export default function MockExamRecords({ records, onAdd, onUpdate, onDelete, sa
                         <span className="mock-exam-section-correct" style={{ width: section.score / 20 * 100 + '%', background: sectionColors[index] }} />
                     </div><strong>{section.score} / 20</strong>
                     <small>풀이 {section.attempted} · 오답 {section.wrong} · 미풀이 {section.unanswered}</small>
-                </div>)}</div>
+                </div>)}
+                    <div className="mock-exam-section-row mock-exam-section-total">
+                        <span>합산</span><div className="mock-exam-section-track" role="img" aria-label={`합산: 풀이 ${analysis.totalAverage.attempted}, 정답 ${analysis.totalAverage.score}, 100문항 기준`}>
+                            <span className="mock-exam-section-attempted" style={{ width: analysis.totalAverage.attempted + '%' }} />
+                            <span className="mock-exam-section-correct" style={{ width: analysis.totalAverage.score + '%', background: '#244a50' }} />
+                        </div><strong>{analysis.totalAverage.score} / 100</strong>
+                        <small>풀이 {analysis.totalAverage.attempted} · 오답 {analysis.totalAverage.wrong} · 미풀이 {analysis.totalAverage.unanswered}</small>
+                    </div>
+                </div>
             </section>
             <section className="surface mock-exam-analysis"><h2>기록 목록 <small>{records.length}개 · 최신순</small></h2>
                 <div className="mock-exam-table-wrap" role="region" aria-label="기록 목록 표, 좁은 화면에서는 가로 스크롤" tabIndex={0}><table className="mock-exam-table"><thead><tr><th scope="col">날짜</th><th scope="col">이름</th><th scope="col">정답/100</th><th scope="col">풀이</th><th scope="col">오답</th><th scope="col">미풀이</th><th scope="col">보기</th></tr></thead>

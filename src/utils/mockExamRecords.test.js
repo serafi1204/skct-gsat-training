@@ -77,6 +77,7 @@ test('analysis orders by exam date and identifies weakest recent section', () =>
     assert.equal(analysis.latest.id, 'b');
     assert.equal(analysis.recentAverage, 12);
     assert.equal(analysis.sectionAverages[0].score, 4);
+    assert.deepEqual(analysis.totalAverage, { attempted: 60, score: 12, wrong: 48, unanswered: 40 });
     assert.equal(analysis.weakest.name, '자료해석');
     assert.equal(analysis.weakest.wrong, 8);
     assert.equal(analysis.weakest.unanswered, 10);
