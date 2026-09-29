@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { requestProfile } from '../utils/profileClient.js';
 import { normalizeStoredProfile } from '../utils/storedProfile.js';
+import { clearRecordCode, loadRecordCode, saveRecordCode } from '../utils/recordCodeCookie.js';
 
 export function useRemoteProfile() {
     const [code, setCode] = useState(null);
@@ -12,6 +13,7 @@ export function useRemoteProfile() {
     const pendingSave = useRef(Promise.resolve());
     const activeCode = useRef(null);
     const saveNumber = useRef(0);
+    const autoOpenStarted = useRef(false);
 
     useEffect(() => {
         if (!code || !profile) return;
@@ -32,7 +34,7 @@ export function useRemoteProfile() {
         });
     }, [code, profile]);
 
-    const open = async rawCode => {
+    const open = useCallback(async rawCode => {
         const nextCode = rawCode.trim();
         if (!nextCode) { setError('기록 코드를 입력해 주세요.'); return; }
         setStatus('loading');
@@ -48,11 +50,19 @@ export function useRemoteProfile() {
             setCode(nextCode);
             setProfile(nextProfile);
             setStatus('saved');
+            saveRecordCode(nextCode);
         } catch (reason) {
             setError(reason.message || '기록을 불러오지 못했습니다.');
             setStatus('locked');
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (autoOpenStarted.current) return;
+        autoOpenStarted.current = true;
+        const rememberedCode = loadRecordCode();
+        if (rememberedCode) void open(rememberedCode);
+    }, [open]);
 
     const updateProfile = updater => setProfile(current => current
         ? normalizeStoredProfile(typeof updater === 'function' ? updater(current) : updater)
@@ -64,6 +74,7 @@ export function useRemoteProfile() {
         try { await pendingSave.current; }
         catch { setStatus('error'); return; }
         activeCode.current = null;
+        clearRecordCode();
         setCode(null);
         setProfile(null);
         setStatus('locked');

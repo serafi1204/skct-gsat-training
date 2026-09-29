@@ -38,7 +38,14 @@ function MockExamStackedChart({ records, focus, onSelect }) {
                     const bar = chart.getDatasetMeta(0).data[index];
                     if (!bar) continue;
                     const value = stacked ? record.result.score : record.result.sections[focus].correct;
-                    context.fillText(stacked ? `${value}` : `${value}/20`, bar.x, chart.scales.y.getPixelForValue(value) - 7);
+                    const attempted = stacked ? record.result.total.attempted : record.result.sections[focus].attempted;
+                    const correctY = chart.scales.y.getPixelForValue(value) - 7;
+                    const attemptedY = chart.scales.y.getPixelForValue(attempted) - 7;
+                    const closeLabels = correctY - attemptedY < 16;
+                    context.fillStyle = '#526770';
+                    context.fillText(`풀이 ${attempted}`, bar.x, closeLabels ? attemptedY - 14 : attemptedY);
+                    context.fillStyle = '#172b38';
+                    context.fillText(`정답 ${value}`, bar.x, closeLabels ? attemptedY : correctY);
                 }
                 context.restore();
             },
@@ -57,7 +64,7 @@ function MockExamStackedChart({ records, focus, onSelect }) {
             plugins: [recordBarLayers],
             options: {
                 responsive: true, maintainAspectRatio: false, animation: false,
-                layout: { padding: { top: 22 } },
+                layout: { padding: { top: 34 } },
                 interaction: { mode: 'index', intersect: false },
                 onClick: (_, elements) => { if (elements.length) onSelect(records[elements[0].index].id); },
                 scales: {
