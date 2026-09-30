@@ -94,7 +94,19 @@ function MockExamStackedChart({ records, focus, onSelect }) {
     </div></div>;
 }
 
-export default function MockExamRecords({ records, onAdd, onUpdate, onDelete, saveStatus, saveError, onRetrySave }) {
+function SubjectNote({ section, value, onSave }) {
+    const [draft, setDraft] = useState(value);
+    useEffect(() => setDraft(value), [value]);
+    return <label className="mock-exam-subject-note">
+        <span>{section}</span>
+        <textarea aria-label={`${section} 메모`} rows={2} value={draft}
+            placeholder="오답 유형, 풀이 요령, 다음 학습 목표 등을 적어 주세요."
+            onChange={event => setDraft(event.target.value)}
+            onBlur={() => { if (draft !== value) onSave(section, draft); }} />
+    </label>;
+}
+
+export default function MockExamRecords({ records, onAdd, onUpdate, onDelete, saveStatus, saveError, onRetrySave, subjectNotes = {}, onSubjectNoteChange }) {
     const [editor, setEditor] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
     const [selectedId, setSelectedId] = useState(null);
@@ -179,6 +191,14 @@ export default function MockExamRecords({ records, onAdd, onUpdate, onDelete, sa
                     </tr>)}</tbody></table></div>
             </section>
         </>}
+        <section className="surface mock-exam-analysis" aria-labelledby="subject-notes-heading">
+            <h2 id="subject-notes-heading">과목별 메모</h2>
+            <div className="mock-exam-subject-notes">
+                {MOCK_EXAM_SECTIONS.map(section => <SubjectNote key={section} section={section}
+                    value={subjectNotes[section] ?? ''} onSave={onSubjectNoteChange} />)}
+            </div>
+            <p>메모란을 벗어나면 자동 저장됩니다.</p>
+        </section>
         {(editor === 'new' || edited) && <MockExamDialog key={editor} record={edited} onClose={() => setEditor(null)}
             onSave={input => {
                 if (edited) onUpdate(edited.id, input);

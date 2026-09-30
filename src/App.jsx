@@ -263,6 +263,10 @@ const App = () => {
                 }))}
                 omr={profile.omr}
                 mockExams={profile.mockExams}
+                subjectNotes={profile.subjectNotes}
+                onSubjectNoteChange={(section, note) => updateProfile(previous => ({ ...previous,
+                    subjectNotes: { ...previous.subjectNotes, [section]: note },
+                }))}
                 onAddMockExam={addMockExam}
                 onUpdateMockExam={updateMockExam}
                 onDeleteMockExam={deleteMockExam}

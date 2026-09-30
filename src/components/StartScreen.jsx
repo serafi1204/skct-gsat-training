@@ -34,7 +34,7 @@ const modeHistory = (history, mode) => history.filter(record => mode === 'TABLE'
     : record.examType === mode);
 
 export default function StartScreen({ preferences, onPreferenceChange, onStart, history, onClearHistory,
-    todo, onTodoChange, omr, onOmrChange, mockExams, onAddMockExam, onUpdateMockExam, onDeleteMockExam,
+    todo, onTodoChange, omr, onOmrChange, mockExams, onAddMockExam, onUpdateMockExam, onDeleteMockExam, subjectNotes, onSubjectNoteChange,
     saveStatus, saveError, onRetrySave, onSwitchCode,
     timers, onTimerAction }) {
     const [activeTab, setActiveTab] = useState('training');
@@ -129,6 +129,7 @@ export default function StartScreen({ preferences, onPreferenceChange, onStart, 
             </main>
             <main className="mock-exam-main" id="records-panel" role="tabpanel" aria-labelledby="records-tab" hidden={activeTab !== 'records'}>
                 {activeTab === 'records' && <MockExamRecords records={mockExams} onAdd={onAddMockExam} onUpdate={onUpdateMockExam} onDelete={onDeleteMockExam}
+                    subjectNotes={subjectNotes} onSubjectNoteChange={onSubjectNoteChange}
                     saveStatus={saveStatus} saveError={saveError} onRetrySave={onRetrySave} />}
             </main>
         </div>

@@ -103,6 +103,11 @@ input[type='number'] { -moz-appearance: textfield; }
 .mock-exam-chart { width: 100%; height: 280px; }
 .mock-exam-analysis > p, .mock-exam-empty p { margin: 12px 0 0; color: #62777e; font-size: 12px; line-height: 1.5; }
 .mock-exam-section-bars { display: grid; gap: 8px; }
+.mock-exam-subject-notes { display: grid; gap: 10px; }
+.mock-exam-subject-note { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 12px; }
+.mock-exam-subject-note > span { flex: 0 0 80px; padding-top: 8px; color: #244a50; font-size: 13px; font-weight: 700; }
+.mock-exam-subject-note textarea { flex: 1 1 220px; min-width: 0; width: 100%; min-height: 64px; padding: 8px 10px; border: 1px solid #cfdbda; border-radius: 7px; resize: vertical; background: #fff; color: #172b38; font: inherit; font-size: 13px; line-height: 1.5; }
+.mock-exam-subject-note textarea:focus-visible { outline: 2px solid #0f766e; outline-offset: 2px; }
 .mock-exam-section-row { display: grid; grid-template-columns: 80px minmax(0, 1fr) 66px 60px; align-items: center; gap: 10px; font-size: 13px; }
 .mock-exam-section-row > strong { text-align: right; font-variant-numeric: tabular-nums; }
 .mock-exam-section-row > small { color: #62777e; text-align: right; }

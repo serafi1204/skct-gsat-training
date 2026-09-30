@@ -19,7 +19,8 @@ test('new codes start empty and saved data is shared by the same code', async ()
         answers: '12345'.repeat(20), correct: '12345'.repeat(20),
         createdAt: '2026-09-29T00:00:00Z', updatedAt: '2026-09-29T00:00:00Z' };
     const profile = { ...first.body.profile, history: [{ examType: 'TABLE', accuracy: 80 }],
-        omr: { answers: '123', correct: '321' }, mockExams: [mockExam] };
+        omr: { answers: '123', correct: '321' }, mockExams: [mockExam],
+        subjectNotes: { ...first.body.profile.subjectNotes, 자료해석: '단위 확인\n그래프 축 먼저 읽기' } };
     const saved = await handleProfileAction({ action: 'save', code: 'sample-code', profile }, store);
     assert.equal(saved.status, 200);
     assert.equal(records.has('sample-code'), false);
@@ -29,6 +30,7 @@ test('new codes start empty and saved data is shared by the same code', async ()
     assert.equal(reopened.body.exists, true);
     assert.deepEqual(reopened.body.profile.history, profile.history);
     assert.equal(reopened.body.profile.omr.answers, '123');
+    assert.deepEqual(reopened.body.profile.subjectNotes, profile.subjectNotes);
     assert.equal(reopened.body.profile.mockExams[0].name, mockExam.name);
     assert.equal(reopened.body.profile.mockExams[0].date, mockExam.date);
     assert.equal(reopened.body.profile.mockExams[0].answers.replace(/\n/g, ''), mockExam.answers);
@@ -37,6 +39,7 @@ test('new codes start empty and saved data is shared by the same code', async ()
     const different = await handleProfileAction({ action: 'load', code: 'other-code' }, store);
     assert.equal(different.body.exists, false);
     assert.deepEqual(different.body.profile.history, []);
+    assert.equal(different.body.profile.subjectNotes.자료해석, '');
 });
 
 test('rejects invalid codes and malformed saves', async () => {
