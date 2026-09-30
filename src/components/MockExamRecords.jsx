@@ -43,9 +43,9 @@ function MockExamStackedChart({ records, focus, onSelect }) {
                     const attemptedY = chart.scales.y.getPixelForValue(attempted) - 7;
                     const closeLabels = correctY - attemptedY < 16;
                     context.fillStyle = '#526770';
-                    context.fillText(`풀이 ${attempted}`, bar.x, closeLabels ? attemptedY - 14 : attemptedY);
+                    context.fillText(String(attempted), bar.x, closeLabels ? attemptedY - 14 : attemptedY);
                     context.fillStyle = '#172b38';
-                    context.fillText(`정답 ${value}`, bar.x, closeLabels ? attemptedY : correctY);
+                    context.fillText(String(value), bar.x, closeLabels ? attemptedY : correctY);
                 }
                 context.restore();
             },
@@ -58,18 +58,18 @@ function MockExamStackedChart({ records, focus, onSelect }) {
                     label: MOCK_EXAM_SECTIONS[index],
                     data: records.map(record => record.result.sections[index].correct),
                     backgroundColor: sectionColors[index],
-                    barThickness: 34,
+                    barThickness: 30,
                 })),
             },
             plugins: [recordBarLayers],
             options: {
                 responsive: true, maintainAspectRatio: false, animation: false,
-                layout: { padding: { top: 34 } },
+                layout: { padding: { top: 30 } },
                 interaction: { mode: 'index', intersect: false },
                 onClick: (_, elements) => { if (elements.length) onSelect(records[elements[0].index].id); },
                 scales: {
                     y: { stacked, min: 0, max: stacked ? 100 : 20, title: { display: true, text: stacked ? '총점 (100점)' : `${MOCK_EXAM_SECTIONS[focus]} 정답 수 (20점)` } },
-                    x: { stacked: true, ticks: { autoSkip: false, maxRotation: 0 } },
+                    x: { stacked: true, grid: { display: false }, ticks: { autoSkip: false, maxRotation: 0, font: { size: 10 }, padding: 4 } },
                 },
                 plugins: {
                     legend: { display: false },
@@ -89,7 +89,7 @@ function MockExamStackedChart({ records, focus, onSelect }) {
         });
         return () => chart.destroy();
     }, [records, focus, onSelect]);
-    return <div className="mock-exam-chart-scroll" tabIndex={0} role="region" aria-label="전체 기록 그래프, 가로 스크롤"><div className="mock-exam-chart" style={{ minWidth: records.length <= 3 ? '100%' : `${60 + records.length * 78}px` }}>
+    return <div className="mock-exam-chart-scroll" tabIndex={0} role="region" aria-label="전체 기록 그래프, 가로 스크롤"><div className="mock-exam-chart" style={{ minWidth: `${90 + records.length * 60}px` }}>
         <canvas ref={canvas} role="img" aria-label={focus === -1 ? '전체 모의고사의 날짜순 영역별 정답 수 누적 막대그래프. 연한 후방 막대는 푼 문항 수' : `전체 모의고사의 ${MOCK_EXAM_SECTIONS[focus]} 정답 수 막대그래프. 연한 후방 막대는 푼 문항 수`} />
     </div></div>;
 }

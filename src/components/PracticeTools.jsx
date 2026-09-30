@@ -144,9 +144,9 @@ function AnswerSheet({ answers, correctAnswers, onSelectAnswer }) {
         <div className="omr-scroll" id="omr-panel" role="tabpanel" aria-labelledby={`omr-tab-${activeSection}`}>
             {Array.from({ length: 20 }, (_, offset) => {
                 const question = activeSection * 20 + offset;
-                const result = answers[question] && correctAnswers[question]
+                const result = correctAnswers[question]
                     ? (answers[question] === correctAnswers[question] ? 'correct' : 'incorrect') : '';
-                return <div className={`omr-row ${Math.floor(question / 5) % 2 === 1 ? 'shaded' : ''}`} key={question}>
+                return <div className={`omr-row ${Math.floor(question / 5) % 2 === 1 ? 'shaded' : ''} ${result}`} key={question}>
                     <span className="omr-number">{question + 1}</span>
                     <div className="omr-choices" role="group" aria-label={`${question + 1}번 답안`}>
                         {[1, 2, 3, 4, 5].map(choice => {
